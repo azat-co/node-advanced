@@ -39,7 +39,8 @@ Azat Mardan @azat_co
 * Deep Dive into Node v8 CLI and REPL
 * global, process and buffer
 * dates
-* How module.exports and `require()` actually work
+* Crypto
+* How `module.exports` and `require()` actually work
 * C++ Addons
 
 ---
@@ -52,7 +53,6 @@ Azat Mardan @azat_co
 
 ---
 
-
 ## Module 4: Streaming
 
 ---
@@ -62,6 +62,7 @@ Azat Mardan @azat_co
 * net module
 * dns module
 * http module
+* node-oauth
 
 ---
 
@@ -70,6 +71,8 @@ Azat Mardan @azat_co
 * Debugging
 * Http Agents
 * cluster and pm2
+* npm scripts (concurrenty)
+* shelljs, argv
 * Queue
 * Microservices and Docker
 * Serverless
