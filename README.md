@@ -6,7 +6,7 @@ build-lists: true
 [.slidenumbers: false] 
 [.hide-footer]
 
-![fit](images/.png)
+![fit](images/Node-Advanced-x2-1.png)
 
 ---
 
@@ -22,11 +22,11 @@ Azat Mardan @azat_co
 
 # Node Advanced
 
-![](images/.png)
+![](images/Node-Advanced-x2-1.png)
 
 * Videos: <http://node.university/p/node-advanced>
-* Slides: in `*.md` here
-* Code: in `code` here
+* Slides: in `*.md` in <https://github.com/azat-co/node-advanced>
+* Code: in `code` in <https://github.com/azat-co/node-advanced>
 
 ---
 
@@ -38,25 +38,23 @@ Azat Mardan @azat_co
 
 * TOC
 * What to expect
-* What youn need
+* What you need
 
 ---
 
-## Module 2: Node Internals
+## Module 2: Modules
 
-* Node Architecture: libuv
-* Chrome V8 and Chakra
-* Deep Dive into Node v8 CLI and REPL
-* global, process and buffer
-* dates
-* Crypto
 * How `module.exports` and `require()` actually work
-* C++ Addons
+* npm tricks (scripts) and npm scripts 
 
 ---
 
-## Module 3: Node Event Loop
+## Module 3: Node Event Loop and Async Programming
 
+* Event look
+* Call stack
+* setTimeout, process.nextTick
+* Error-first callback
 * Event Emitters
 * Promises vs events
 * Async/await
@@ -65,34 +63,108 @@ Azat Mardan @azat_co
 
 ## Module 4: Streaming
 
----
-
-## Module 5: Core Networking
-
-* net module
-* dns module
-* http module
-* node-oauth
+* reading
+* writing
+* duplex
+* transform
 
 ---
 
-## Module 6: Node Advanced in Practice
+## Module 5: Debugging
 
-* Debugging
-* Http Agents
-* cluster and pm2
-* npm scripts (concurrenty)
-* shelljs, argv
-* Queue
-* Microservices and Docker
-* Serverless
+* Debugging 
+* CPU profiling
+* Networking Debugging with DevTools
+
+---
+
+## Module 6: Scaling
+
+* cluster
+* Load testing
+* Messaging
+* spawn, fork, exec
+* Offloading CPU-intensive tasks
 
 ---
 
 ## Outro
 
 * Summary
-* AWS Events
-* AWS Certifications
-* AWS Books
-* AWS Courses
+
+---
+
+
+# What to expect
+
+* Pure Node
+* Core Node
+* ES Next
+
+---
+
+# What not to expect
+
+* No npm modules
+* No JavaScript
+* No frameworks
+
+---
+
+# What you need
+
+* Node version 8+
+* npm version 5+
+* Chrome
+
+---
+
+## Module 2: Modules
+
+* How `module.exports` and `require()` actually work
+* npm tricks (scripts) and npm scripts 
+
+---
+
+## Module 3: Node Event Loop and Async Programming
+
+* Event look
+* Call stack
+* setTimeout, process.nextTick
+* Error-first callback
+* Event Emitters
+* Promises vs events
+* Async/await
+
+---
+
+## Module 4: Streaming
+
+* reading
+* writing
+* duplex
+* transform
+
+---
+
+## Module 5: Debugging
+
+* Debugging 
+* CPU profiling
+* Networking Debugging with DevTools
+
+---
+
+## Module 6: Scaling
+
+* cluster
+* Load testing
+* Messaging
+* spawn, fork, exec
+* Offloading CPU-intensive tasks
+
+---
+
+## Outro
+
+* Summary
