@@ -545,6 +545,308 @@ undefined
 
 ## Error-first callback
 
+define:
+
+```js
+const myFn = (cb) => {
+  // define error and data
+  // do something...
+  cb(error, data)
+}
+```
+
+---
+
+Use: 
+
+```js
+myFn((error, data)=>{
+  
+})
+```
+
+---
+
+Argument names don't matter (order does):
+
+```js
+myFn((err, result)=>{
+  
+})
+```
+
+---
+
+Callbacks not always async
+
+```js
+arr.map((item, index, list)=>{
+  
+})
+```
+
+---
+
+Errors first but the callback last
+
+(Popular convention but not enforced by Node)
+
+---
+
+## Promises
+
+* Consume from a module (axios, koa, etc.)
+* Create your own using ES6 Promise or a library ([bluebird]() or [q](https://documentup.com/kriskowal/q/))
+
+
+---
+
+## Usage and consumption of ready promises
+
+---
+
+# Callbacks Syntax 
+
+```js
+asyncFn1((error1, data1) => {
+  asyncFn2(data1, (error2, data2) => {
+    asyncFn3(data2, (error3, data3) => {
+      asyncFn4(data3, (error4, data4) => {
+        // Do something with data4
+      })
+    })
+  })
+})
+```
+
+---
+
+## Promise Syntax Style
+
+```js
+promise1(data1)
+  .then(promise2)
+  .then(promise3)
+  .then(promise4)
+  .then(data4=>{
+    // Do something with data4
+  })
+  .catch(error=>{
+    // handle error1, 2, 3 and 4
+  })
+```
+
+(separation of data and control flow arguments)
+
+---
+
+## Axios Example
+
+```js
+const axios = require('axios')
+axios.get('http://azat.co')
+  .then((response)=>response.data)
+  .then(html => console.log(html))
+```  
+
+---
+
+```js
+const axios = require('axios')
+axios.get('https://azat.co')
+  .then((response)=>response.data)
+  .then(html => console.log(html))
+  .catch(e=>console.error(e))
+```
+
+
+```
+Error: Hostname/IP doesn't match certificate's altnames: "Host: azat.co. is not in the cert's altnames: DNS:*.github.com, DNS:github.com, DNS:*.github.io, DNS:github.io"
+```
+
+
+---
+
+## Naive Promise: Callback Async Function
+
+```js
+function myAsyncTimeoutFn(data, callback) {
+  setTimeout(() => {
+    callback()
+  }, 1000)
+}
+
+myAsyncTimeoutFn('just a silly string argument', () => {
+  console.log('Final callback is here')
+})
+```
+
+---
+
+## Naive Promise: Implementation
+
+```js
+function myAsyncTimeoutFn(data) {
+
+  let _callback = null
+  setTimeout( () => {
+    if ( _callback ) callback()
+  }, 1000)
+  
+  return {
+    then(cb){
+      _callback = cb
+    }
+  }
+
+}
+
+myAsyncTimeoutFn('just a silly string argument').then(() => {
+  console.log('Final callback is here')
+})
+```
+
+---
+
+## Naive Promise: Implementation with Errors
+
+```js
+const fs = require('fs')
+function readFilePromise( filename ) {
+  let _callback = () => {}
+  let _errorCallback = () => {}
+
+  fs.readFile(filename, (error, buffer) => {
+    if (error) _errorCallback(error)
+    else _callback(buffer)
+  })
+
+  return {
+    then( cb, errCb ){
+      _callback = cb
+      _errorCallback = errCb
+    }
+  }
+
+}
+```
+
+---
+
+## Naive Promise: Reading File
+
+```js
+readFilePromise('package.json').then( buffer => {
+  console.log( buffer.toString() )
+  process.exit(0)
+}, err => {
+  console.error( err )
+  process.exit(1)
+})
+```
+
+---
+
+## Naive Promise: Triggering Error
+
+```js
+readFilePromise('package.jsan').then( buffer => {
+  console.log( buffer.toString() )
+  process.exit(0)
+}, err => {
+  console.error( err )
+  process.exit(1)
+})
+```
+
+```
+{ Error: ENOENT: no such file or directory, open 'package.jsan'
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'package.jsan' }
+```
+
+---
+
+## ES6/ES2015 Promise
+
+```
+Promise === global.Promise
+```
+
+(Node version 8+)
+
+`Promise` take callback with `resolve` and `reject`
+
+---
+
+## Simple Proper Promise Implementation (from ES6/ES2015)
+
+```js
+const fs = require('fs')
+function readJSON(filename, enc='utf8'){
+  return new Promise(function (resolve, reject){
+    fs.readFile(filename, enc, function (err, res){
+      if (err) reject(err)
+      else {
+        try {
+          resolve(JSON.parse(res))
+        } catch (ex) {
+          reject(ex)
+        }
+      }
+    })
+  })
+}
+
+readJSON('./package.json').then(console.log)
+```
+
+---
+
+## Advanced Proper Promise Implementation (from ES6/ES2015) for both promises and callbacks
+
+```js
+const fs = require('fs')
+
+const readFileIntoArray = function(file, cb = null) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(file, (error, data) => {
+      if (error) {
+        if (cb) return cb(error) 
+        return reject(error)
+      }
+
+      const lines = data.toString().trim().split('\n')
+      if (cb) return cb(null, lines)
+      else return resolve(lines)
+    })
+  })
+}
+```
+
+---
+
+## Example call
+
+```js
+const printLines = (lines) => {
+  console.log(`there are ${lines.length} line(s)`)
+  console.log(lines)
+}
+const FILE_NAME = __filename
+
+readFileIntoArray(FILE_NAME)
+  .then(printLines)
+  .catch(console.error)
+
+readFileIntoArray(FILE_NAME, (error, lines) => {
+  if (error) return console.error(error)
+  printLines(lines)
+})
+```
+
 ---
 
 ## Event Emitters
