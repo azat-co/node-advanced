@@ -851,9 +851,59 @@ readFileIntoArray(FILE_NAME, (error, lines) => {
 
 ## Event Emitters
 
+1. Import `require('events')`
+1. Extend `class Name extends ...`
+1. Instantiate `new Name()`
+1. Add listeners `.on()`
+1. Emit `.emit()`
+
+
 ---
 
 ## Promises vs events
+
+* Events are sync
+* React to same event from multiple places 
+* React to same event multiple times
+
+---
+
+Events are about building extensible functionality and making modular code flexible
+
+* `.emit()` can be in the module and `.on()` in the main program which consumes the module
+* `.on()` can be in the module and `.emit()` in the main program
+* pass data with `emit()`
+* `error` is a special event (if listen to it then no crashes)
+
+---
+
+* `on()` execution happen in the order in which they are defined (`prependListener` or `removeListener`)
+
+---
+
+* Default maximum listeners is 10 (to find memory leaks), `setMaxListeners` ([source](https://github.com/nodejs/node/blob/master/lib/events.js#L81))
+
+```js
+EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
+  if (typeof n !== 'number' || n < 0 || isNaN(n)) {
+    const errors = lazyErrors();
+    throw new errors.RangeError('ERR_OUT_OF_RANGE', 'n',
+                                'a non-negative number', n);
+  }
+  this._maxListeners = n;
+  return this;
+};
+```
+
+---
+
+class 
+
+```js
+process.nextTick(()=>{
+  this.emit()
+})
+```
 
 ---
 
