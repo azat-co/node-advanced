@@ -34,22 +34,22 @@ Azat Mardan @azat_co
 
 --
 
-## Module 1: Course Overview
+## Course Overview
 
-* TOC
+* Table of Contents
 * What to expect
 * What you need
 
 ---
 
-## Module 2: Modules
+## Module 1: Modules
 
 * How `module.exports` and `require()` actually work
 * npm tricks (scripts) and npm scripts 
 
 ---
 
-## Module 3: Node Event Loop and Async Programming
+## Module 2: Node Event Loop and Async Programming
 
 * Event look
 * Call stack
@@ -61,7 +61,7 @@ Azat Mardan @azat_co
 
 ---
 
-## Module 4: Streaming
+## Module 3: Streaming
 
 * reading
 * writing
@@ -70,7 +70,7 @@ Azat Mardan @azat_co
 
 ---
 
-## Module 5: Debugging
+## Module 4: Debugging
 
 * Debugging 
 * CPU profiling
@@ -78,7 +78,7 @@ Azat Mardan @azat_co
 
 ---
 
-## Module 6: Scaling
+## Module 5: Scaling
 
 * cluster
 * Load testing
@@ -911,6 +911,70 @@ process.nextTick(()=>{
 
 ---
 
+```js
+const axios = require('axios')
+const getAzatsWebsite = async () => {
+  const response = await axios.get('http://azat.co')
+  return response.data
+}
+getAzatsWebsite().then(console.log)
+```
+
+---
+
+## Util.promisify
+
+```js
+const util = require('util')
+const f = async function() {
+  try {
+    await util.promisify(setTimeout)(()=>{consoleg.log('here')}, 1000)
+  } catch(e) {
+    await Promise.reject(new Error('test'))
+  }
+}
+
+f()
+```
+
+---
+
+```js
+const axios = require('axios')
+const {expect} = require('chai')
+const app = require('../server.js')
+const port = 3004
+
+before(async function() {
+  await app.listen(port, ()=>{console.log('server is running')})
+  console.log('code after the server is running')
+})
+
+describe('express rest api server', async () => {
+  let id
+
+  it('posts an object', async () => {
+    const {data: body} = await axios.post(`http://localhost:${port}/collections/test`, { name: 'John', email: 'john@rpjs.co'})
+    expect(body.length).to.eql(1)
+    expect(body[0]._id.length).to.eql(24)
+    id = body[0]._id
+  })
+
+  it('retrieves an object', async () => {
+    const {data: body} = await axios.get(`http://localhost:${port}/collections/test/${id}`)
+    // console.log(body)
+    expect(typeof body).to.eql('object')
+    expect(body._id.length).to.eql(24)
+    expect(body._id).to.eql(id)
+    expect(body.name).to.eql('John')
+  })
+  // ...
+})
+```
+
+---
+
+## Project: Koa Server with Mocha (async/await)
 
 ---
 
