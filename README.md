@@ -1073,7 +1073,39 @@ processing data from the client:
 
 ---
 
-## Making request to Coindesk API (HTTPS!)
+## Making request to [Coindesk API](https://www.coindesk.com/api/) (HTTPS!)
+
+API: https://api.coindesk.com/v1/bpi/currentprice/<CODE>.json
+
+<https://api.coindesk.com/v1/bpi/currentprice/USD.json>
+<https://api.coindesk.com/v1/bpi/currentprice/JPY.json>
+<https://api.coindesk.com/v1/bpi/currentprice/RUB.json>
+<https://api.coindesk.com/v1/bpi/currentprice/NYC.json>
+
+---
+
+
+```js
+{
+  "time": {
+    "updated": "Jan 9, 2018 19:52:00 UTC",
+    "updatedISO": "2018-01-09T19:52:00+00:00",
+    "updateduk": "Jan 9, 2018 at 19:52 GMT"
+  },
+  "disclaimer": "This data was produced from the CoinDesk Bitcoin Price Index (USD). Non-USD currency data converted using hourly conversion rate from openexchangerates.org",
+  "bpi": {
+    "USD": {
+      "code": "USD",
+      "rate": "14,753.6850",
+      "description": "United States Dollar",
+      "rate_float": 14753.685
+    }
+  }
+}
+```
+
+---
+
 
 ```js
 const fetchBTCPrice = (currency, socket) => {
@@ -1094,6 +1126,8 @@ const fetchBTCPrice = (currency, socket) => {
   req.end()
 }
 ```
+
+
 
 ---
 
