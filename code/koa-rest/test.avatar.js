@@ -10,7 +10,7 @@ const readFile = promisify(require('fs').readFile)
 const AZAT_EMAIL = 'hi@azat.co'
 let server 
 before(async function() {
-  server = app.listen(port, ()=>{console.log('server is running')})
+  server = await app.listen(port, ()=>{console.log('server is running')})
   console.log('code after the server is running')
 })
 

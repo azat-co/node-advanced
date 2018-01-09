@@ -7,7 +7,7 @@ app.use(async ctx => {
   const email = ctx.query.email
   console.log(email)
   if (!email) return false
-  const hash = crypto.createHash('md5').update(email).digest("hex")
+  const hash = crypto.createHash('md5').update(email).digest('hex')
   const response = await axios.get(`https://gravatar.com/avatar/${hash}?size=150`, {
     responseType: 'arraybuffer',
     headers: {

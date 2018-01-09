@@ -412,9 +412,9 @@ Input/Output Messages are most "expensive" (slow)
 
 ---
 
-![](https://www.youtube.com/watch?v=PNa9OMajw9w)
+![](https://youtu.be/PNa9OMajw9w?t=5m48s)
 
-<https://www.youtube.com/watch?v=PNa9OMajw9w>
+<https://youtu.be/PNa9OMajw9w?t=5m48s>
 
 ---
 
@@ -978,24 +978,553 @@ describe('express rest api server', async () => {
 
 ---
 
-# Module 4: Streaming
-
-* reading
-* writing
-* duplex
-* transform
+## Module 3: Networking
 
 ---
 
-## Module 5: Debugging
-
-* Debugging 
-* CPU profiling
-* Networking Debugging with DevTools
+## net
 
 ---
 
-## Module 6: Scaling
+# Any server, not just http or https!
+
+```js
+const server = require('net').createServer()
+server.on('connection', socket => {
+  socket.write('Enter your command: ') // Sent to client
+  socket.on('data', data => {
+    // incoming data from a client
+  })
+
+  socket.on('end', () => {
+    console.log('Client disconnected')
+  })
+})
+
+server.listen(8000, () => console.log('Server bound'))
+```
+
+---
+
+## Client?
+
+```
+telnet localhost 8000
+```
+
+or
+
+```
+nc localhost 8000
+```
+
+or write your own TCP/IP client using Node, C++, Python, etc.
+
+---
+
+## Demo: Bitcoin price ticker 
+
+---
+
+```js
+const https = require('https')
+
+const server = require('net').createServer()
+let counter = 0
+let sockets = {}
+server.on('connection', socket => {
+  socket.id = counter++
+
+  console.log('Welcome to Bitcoin Price Ticker (Data by Coindesk)')
+  console.log(`There are ${counter} clients connected`)
+  socket.write('Enter currency code (e.g., USD or CNY): ')
+
+  socket.on('data', data => {
+    // process data from the client
+  })
+
+  socket.on('end', () => {
+    delete sockets[socket.id]
+    console.log('Client disconnected')
+  })
+})
+
+server.listen(8000, () => console.log('Server bound'))
+```
+
+---
+
+processing data from the client:
+
+```js
+    let currency = data.toString().trim()
+    if (!sockets[socket.id]) {
+      sockets[socket.id] = {
+        currency: currency
+      }
+      console.log(currency)
+    }
+    fetchBTCPrice(currency, socket)
+    clearInterval(sockets[socket.id].interval)
+    sockets[socket.id].interval = setInterval(()=>{
+      fetchBTCPrice(currency, socket)
+    }, 5000)
+```
+
+---
+
+## Making request to Coindesk API (HTTPS!)
+
+```js
+const fetchBTCPrice = (currency, socket) => {
+  const req = https.request({
+    port: 443,
+    hostname: 'api.coindesk.com',
+    method: 'GET',
+    path: `/v1/bpi/currentprice/${currency}.json`
+  }, (res) => {
+    let data = ''
+    res.on('data', (chunk) => {
+      data +=chunk
+    })
+    res.on('end', () => {
+      socket.write(`1 BTC is ${JSON.parse(data).bpi[currency].rate} ${currency}\n`)
+    })
+  })
+  req.end()
+}
+```
+
+---
+
+```
+telnet localhost 8000
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+Enter currency code (e.g., USD or CNY): USD
+1 BTC is 14,707.9438 USD
+1 BTC is 14,694.5113 USD
+1 BTC is 14,694.5113 USD
+CNY
+1 BTC is 40,202.5000 CNY
+RUB
+1 BTC is 837,400.5342 RUB
+1 BTC is 837,400.5342 RUB
+1 BTC is 837,400.5342 RUB
+```
+
+---
+
+## http
+
+static file server (file-server.js)
+
+```js
+const url = require('url')
+const SECRET = process.env.SECRET
+const server = require('http').createServer((req, res) => {
+  console.log(`URL is ${req.url} and the method is ${req.method}`)
+  const courseId = req.url.match(/courses\/([0-9]*)/)[1] // works for /courses/123 to get 123
+  const query = url.parse(req.url, true).query // works for /?key=value&key2=value2 
+  if (courseId && API_KEY===SECRET) {
+    fs.readFile('./archive.sql', (error, data)=>{
+      if (error) {
+        res.writeHead(500)
+        res.end()
+      } else {
+        res.writeHead(200, {'Content-Type': 'text/plain' })
+        res.end(data)
+      }
+    })
+  }
+}).listen(3000, () => {
+  console.log('server is listening on 3000')
+})
+```
+
+---
+
+Command to run the server:
+
+```
+SECRET=NNN nodemon file-server.js
+```
+
+Browser request: <http://localhost:3000/courses/123?API_KEY=NNN>
+
+---
+
+You can use switch... 
+
+```js
+const server = require('http').createServer((req, res) => {
+  switch (req.url) {
+    case '/api':
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      // fetch data from a database
+      res.end(JSON.stringify(data))
+      break
+    case '/home':
+      res.writeHead(200, { 'Content-Type': 'text/html' })
+      // send html from a file
+      res.end(html)
+      break
+    default:
+      res.writeHead(404)
+      res.end()
+  }
+}).listen(3000, () => {
+  console.log('server is listening on 3000')
+})
+```
+
+---
+
+
+Find a problem with this server (from [Advanced Node by Samer Buna](https://app.pluralsight.com/player?course=nodejs-advanced&author=samer-buna&name=nodejs-advanced-m5&clip=3&mode=live)):
+
+```js
+const fs = require('fs')
+const server = require('http').createServer()
+const data = {}
+
+server.on('request', (req, res) => {
+  switch (req.url) {
+  case '/api':
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify(data))
+    break
+  case '/home':
+  case '/about':
+    res.writeHead(200, { 'Content-Type': 'text/html' })
+    res.end(fs.readFileSync(`.${req.url}.html`))
+    break
+  case '/':
+    res.writeHead(301, { 'Location': '/home' })
+    res.end()
+    break
+  default:
+    res.writeHead(404)
+    res.end()
+  }
+})
+
+server.listen(3000)
+```
+
+---
+
+
+Always reading (no caching) and blocking!
+
+```js
+  case '/about':
+    res.writeHead(200, { 'Content-Type': 'text/html' })
+    res.end(fs.readFileSync(`.${req.url}.html`))
+    break
+```
+
+
+---
+
+## Use Status Codes
+
+```
+http.STATUS_CODES
+```
+
+---
+
+
+
+## https
+
+Server needs the key and certificate files:
+
+```
+openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/C=US/ST=CA/L=SF/O=NO\x08A/OU=NA' \
+  -keyout server.key -out server.crt
+```  
+
+---
+
+https server:
+
+```js
+const https = require('https')
+const fs = require('fs')
+
+const server = https.createServer({
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.crt')
+}, (req, res) => {
+  res.writeHead(200)
+  res.end('hello')
+}).listen(443)
+```
+
+---
+
+https request with streaming
+
+```js
+const https = require('https') 
+
+const req = https.request({
+    hostname: 'webapplog.com',
+    port: 443, 
+    path: '/',
+    method: 'GET'
+  }, (res) => {
+  console.log('statusCode:', res.statusCode)
+  console.log('headers:', res.headers)
+
+  res.on('data', (chunk) => {
+    process.stdout.write(chunk)
+  })
+})
+
+req.on('error', (error) => {
+  console.error(error)
+})
+req.end()
+```
+
+---
+
+
+## http2
+
+
+---
+
+```
+openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/C=US/ST=CA/L=SF/O=NO\x08A/OU=NA' \
+  -keyout server.key -out server.crt
+```  
+
+
+---
+
+```js
+const http2 = require('http2')
+const fs = require('fs')
+
+const server = http2.createSecureServer({
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.crt')
+}, (req, res) => {
+  res.end('hello')
+})
+server.on('error', (err) => console.error(err))
+server.listen(3000)
+```
+
+---
+
+```js
+const http2 = require('http2')
+const fs = require('fs')
+
+const server = http2.createSecureServer({
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.crt')
+})
+
+server.on('error', (err) => console.error(err))
+server.on('socketError', (err) => console.error(err))
+
+server.on('stream', (stream, headers) => {
+  // stream is a Duplex
+  stream.respond({
+    'content-type': 'text/html',
+    ':status': 200
+  })
+  stream.end('<h1>Hello World</h1>')
+})
+
+server.listen(3000)
+```
+
+---
+
+![inline](images/http2-click-on-advanced.png)
+
+---
+
+![inline](images/http2-click-on-proceed.png)
+
+---
+
+![inline](images/http2-localhost-request.png)
+
+---
+
+![inline](images/http2-inspecting-self-signed.png)
+
+---
+
+```
+$ curl https://localhost:3000/ -vik
+```
+
+```
+ Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 3000 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* Cipher selection:
+...
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256
+* ALPN, server accepted to use h2
+* Server certificate:
+*  subject: C=US; ST=CA; L=SF; O=NOx08A; OU=NA
+* Using HTTP2, server supports multi-use
+* Connection state changed (HTTP/2 confirmed)
+```
+
+---
+
+## http2 Server Push
+
+---
+
+HTTP/1 makes two requests:
+
+1. HTML: index.html refers to static assets
+2. Assets: style.css + bundle.js + favicon.ico + logo.png
+
+HTTP/2 with server push just one:
+
+1. HTML and assets are pushed by the server
+
+(Assets are not used unless referred to by HTML)
+
+---
+
+```js
+const http2 = require('http2')
+const fs = require('fs')
+
+const server = http2.createSecureServer({
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.crt')
+})
+
+server.on('error', (err) => console.error(err))
+server.on('socketError', (err) => console.error(err))
+```
+
+---
+
+```js
+server.on('stream', (stream, headers) => {
+  stream.respond({
+    'content-type': 'text/html',
+    ':status': 200
+  })
+  stream.pushStream({ ':path': '/myfakefile.js' }, (pushStream) => {
+    pushStream.respond({ 
+      'content-type': 'text/javascript',
+      ':status': 200 
+    })
+    pushStream.end(`alert('you win')`)
+  })
+  stream.end('<script src="/myfakefile.js"></script><h1>Hello World</h1>')
+})
+
+server.listen(3000)
+```
+
+---
+
+![inline](images/http2-push-alert.png)
+
+---
+
+# Additional server push articles
+
+* [What’s the benefit of Server Push?](https://http2.github.io/faq/#whats-the-benefit-of-server-push)
+* [Announcing Support for HTTP/2 Server Push](https://blog.cloudflare.com/announcing-support-for-http-2-server-push-2)
+* [Innovating with HTTP 2.0 Server Push](https://www.igvita.com/2013/06/12/innovating-with-http-2.0-server-push)
+
+---
+
+# Demo: Advanced Express REST API routing in HackHall
+
+---
+
+## Conclusion
+
+Just don't use core http directly. Use Express, Hapi or Koa.
+
+---
+
+
+## Module 4: Debugging
+
+---
+
+## Debugging 
+
+
+```
+$ node inspect debug-me.js
+< Debugger listening on ws://127.0.0.1:9229/80e7a814-7cd3-49fb-921a-2e02228cd5ba
+< For help see https://nodejs.org/en/docs/inspector
+< Debugger attached.
+Break on start in myscript.js:1
+> 1 (function (exports, require, module, __filename, __dirname) { global.x = 5;
+  2 setTimeout(() => {
+  3   console.log('world');
+debug>
+```
+
+---
+
+```
+Stepping#
+cont, c - Continue execution
+next, n - Step next
+step, s - Step in
+out, o - Step out
+pause - Pause running code (like pause button in Developer Tools)
+```
+
+---
+
+## Node V8 Inspector
+
+```
+$ node --inspect index.js
+Debugger listening on 127.0.0.1:9229.
+To start debugging, open the following URL in Chrome:
+    chrome-devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=127.0.0.1:9229/dc9010dd-f8b8-4ac5-a510-c1a114ec7d29
+```
+
+---
+
+## Node V8 Inspector Demo
+
+---
+
+## VS Code Demo
+
+---
+
+## 
+
+
+## CPU profiling
+
+---
+
+## Networking Debugging with DevTools
+
+---
+
+## Module 4: Scaling
 
 * cluster
 * Load testing
@@ -1007,4 +1536,6 @@ describe('express rest api server', async () => {
 
 ## Outro
 
-* Summary
+---
+
+## Summary
