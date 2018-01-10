@@ -1006,6 +1006,26 @@ server.listen(8000, () => console.log('Server bound'))
 
 ---
 
+## Chat
+
+chat.js:
+
+```js
+if (!sockets[socket.id]) {
+  socket.name = data.toString().trim()
+  socket.write(`Welcome ${socket.name}!\n`)
+  sockets[socket.id] = socket
+  return
+}
+Object.entries(sockets).forEach(([key, cs]) => {
+  if (socket.id === key) return
+  cs.write(`${socket.name} ${timestamp()}: `)
+  cs.write(data)
+})
+```    
+
+---
+
 ## Client?
 
 ```
@@ -1022,9 +1042,13 @@ or write your own TCP/IP client using Node, C++, Python, etc.
 
 ---
 
-## Demo: Bitcoin price ticker 
+## Demo: Bitcoin Price Ticker 
+
+bitcoin-price-ticker.js
 
 ---
+
+# Ticker Server
 
 ```js
 const https = require('https')
@@ -1601,7 +1625,39 @@ ifconfig | grep "inet " | grep -v 127.0.0.1
 
 ---
 
-<https://www.npmjs.com/package/systeminformation> and <https://github.com/sebhildebrandt/systeminformation>
+## CPU Usage in %
+
+```js
+//os-cpu.js
+const os = require('os')
+let cpus = os.cpus()
+
+cpus.forEach((cpu, i) => {
+  console.log('CPU %s:', i)
+  let total = 0
+
+  for (let type in cpu.times) {
+    total += cpu.times[type]
+  }
+
+  for (let type in cpu.times) {
+    console.log(`\t ${type} ${Math.round(100 * cpu.times[type] / total)}%`)
+  }
+})
+```
+
+---
+
+# Free Memory
+
+* `free = 
+---
+
+Useful Libraries
+
+*
+* <https://www.npmjs.com/package/systeminformation> and <https://github.com/sebhildebrandt/systeminformation>
+
 
 ---
 
