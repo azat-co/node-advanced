@@ -1560,11 +1560,76 @@ To start debugging, open the following URL in Chrome:
 
 ## Module 4: Scaling
 
-* cluster
-* Load testing
-* Messaging
-* spawn, fork, exec
-* Offloading CPU-intensive tasks
+---
+
+## `os` Module
+
+---
+
+```js
+const os = require('os')
+console.log(os.freemem())
+console.log(os.type())
+console.log(os.release())
+console.log(os.cpus())
+console.log(os.uptime())
+console.log(os.networkInterface())
+```
+
+---
+
+```
+{ lo0:
+   [ { address: '127.0.0.1',
+       netmask: '255.0.0.0',
+       family: 'IPv4',
+       mac: '00:00:00:00:00:00',
+       internal: true },
+  ...
+  en0:
+   [ { address: '10.0.1.4',
+       netmask: '255.255.255.0',
+       family: 'IPv4',
+       mac: '78:4f:43:96:c6:f1',
+       internal: false } ],
+  ...  
+```  
+
+```
+ifconfig | grep "inet " | grep -v 127.0.0.1
+```
+
+---
+
+<https://www.npmjs.com/package/systeminformation> and <https://github.com/sebhildebrandt/systeminformation>
+
+---
+
+##  cluster
+
+---
+
+##  Load testing
+
+---
+
+```
+npm i loadtest -g
+loadtest -c 10 --rps 100 10.0.1.4:3000
+```
+
+---
+
+##  Messaging
+
+---
+
+##  spawn, fork, exec
+
+---
+
+##  Offloading CPU-intensive tasks
+
 
 ---
 
