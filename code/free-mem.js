@@ -1,4 +1,5 @@
 // Linux only, not macOS. On macOS it's os
+// https://stackoverflow.com/questions/20578095/node-js-get-actual-memory-usage-as-a-percent
 
 var spawn = require("child_process").spawn;
 var prc = spawn("free", []);

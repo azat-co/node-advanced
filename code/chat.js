@@ -1,8 +1,10 @@
+// Source: https://github.com/jscomplete/advanced-nodejs/blob/master/4.3/chat.js
+
 const server = require('net').createServer()
 let counter = 0
 let sockets = {}
 
-function timestamp() {
+function timestamp () {
   const now = new Date()
   return `${now.getHours()}:${now.getMinutes()}`
 }
@@ -11,7 +13,6 @@ server.on('connection', socket => {
   socket.id = counter++
 
   console.log('Client connected')
-  console.log(`There are ${Object.keys(sockets).length} people in this chat`)
   socket.write('Please type your name: ')
 
   socket.on('data', data => {
@@ -22,7 +23,7 @@ server.on('connection', socket => {
       return
     }
     Object.entries(sockets).forEach(([key, cs]) => {
-      if (socket.id == key) return
+      if (socket.id === key) return
       cs.write(`${socket.name} ${timestamp()}: `)
       cs.write(data)
     })
