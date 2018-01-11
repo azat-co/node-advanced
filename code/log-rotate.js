@@ -1,3 +1,11 @@
+// ```
+// node log-files.js
+// ```
+
+// ```
+// tail -f *.log
+// ```
+
 const fs = require('fs')
 const path = require('path')
 const dirname = path.join(__dirname)
@@ -11,7 +19,7 @@ files.forEach(file => {
     if (err) throw err
 
     if ((Date.now() - stats.mtime.getTime() > 7 * ms1Day)) {
-      console.log(`Deleting ${filePath}`)
+      console.log(`Deleting ${filePath} with time ${stats.mtime.toDateString()}`)
       // fs.unlink(filePath, (err) => {
       //   if (err) throw err
       //   console.log(`deleted ${filePath}`)
