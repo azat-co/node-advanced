@@ -1527,6 +1527,95 @@ Just don't use core http directly. Use Express, Hapi or Koa.
 ## Debugging 
 
 
+---
+
+## `console.log` is one of the best debuggers
+
+* Not breaking the execution flow
+* Nothing extra needed (unlike Node Inspector/DevTools or VS Code)
+* Robust: clearly shows if a line is executed
+* Clearly shows data
+
+---
+
+## Console Tricks
+
+---
+
+## Streaming logs to files
+
+```js
+const fs = require('fs')
+
+const out = fs.createWriteStream('./out.log')
+const err = fs.createWriteStream('./err.log')
+
+const console2 = new console.Console(out, err)
+
+setInterval(() => {
+  console2.log(new Date())
+  console2.error(new Error('Whoops'))
+}, 500)
+```
+
+---
+
+```js
+console.log('Step', 2) // Step2
+const name = 'Azat'
+const city = 'San Francisco'
+console.log('Hello %s from %s', name, city)
+```
+
+---
+
+```js
+const util = require('util')
+console.log(util.format('Hello %s from %s', name, city)) // Hello Azat from San Francisco
+console.log('Hello %s from %s', 'Azat', {city: 'San Francisco'}) // Hello Azat from [object Object]
+console.log({city: 'San Francisco'}) // { city: 'San Francisco' }
+console.log(util.inspect({city: 'San Francisco'})) // { city: 'San Francisco' }
+```
+
+---
+
+```js
+const str = util.inspect(global, {depth: 0})
+console.dir(global, {depth: 0})
+```
+
+```
+info = log
+warn = error
+trace // prints call stack
+assert // require('assert')
+```
+
+---
+
+# Console Timers
+
+```js
+console.log('Ethereum transaction started')
+console.time('Ethereum transaction')
+web3.send(txHash, (error, results)=>{
+  console.timeEnd('Ethereum transaction') // Ethereum transaction: 4545.921ms
+})
+```
+
+---
+
+## Real Debuggers
+
+* CLI
+* DevTools
+* VS Code
+
+
+---
+
+## Node CLI Debugger
+
 ```
 $ node inspect debug-me.js
 < Debugger listening on ws://127.0.0.1:9229/80e7a814-7cd3-49fb-921a-2e02228cd5ba
@@ -1561,6 +1650,13 @@ To start debugging, open the following URL in Chrome:
     chrome-devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=127.0.0.1:9229/dc9010dd-f8b8-4ac5-a510-c1a114ec7d29
 ```
 
+
+better to break right away:
+
+```
+$ node --inspect --debug-brk index.js
+```
+
 ---
 
 ## Node V8 Inspector Demo
@@ -1570,8 +1666,6 @@ To start debugging, open the following URL in Chrome:
 ## VS Code Demo
 
 ---
-
-## 
 
 
 ## CPU profiling
@@ -1583,6 +1677,64 @@ To start debugging, open the following URL in Chrome:
 ---
 
 ## Module 4: Scaling
+
+---
+
+## Why You Need to Scale
+
+* Performance (e.g., under 100ms response time)
+* Availability (e.g., 99.999%)
+* Fault tolerance (e.g., zero downtime)
+
+^Zero downtime
+^ Offload the workload: when Node server is a single process, it can be easily blocked
+^https://blog.interfaceware.com/disaster-recovery-vs-high-availability-vs-fault-tolerance-what-are-the-differences/
+
+---
+
+## Scaling Strategies
+
+* Forking (just buy more EC2s) - what we will do
+* Decomposing (e.g., microservices just for bottlenecks) - in another course
+* Sharding (e.g., eu.docusign.com and na2.docusign.net) - not recommended
+
+---
+
+## Offload the workload
+
+* `spawn()` - events, stream, messages, no size limit, no shell
+* `fork()` - Node processes, exchange messages
+* `exec()` - callback, buffer, 1Gb size limit, creates shell
+* `execFile()` - exec file, no shell
+
+---
+
+* `spawnSync()`
+* `execFileSync()`
+* `execSync()`
+* `forkSync()`
+
+---
+
+## Executing bash and spawn params
+
+```js
+const {spawn} = require('child_process')
+spawn('cd $HOME/Downloads && find . -type f | wc -l', 
+  {stdio: 'inherit', 
+  shell: true, 
+  cwd: '/', 
+  env: {PASSWORD: 'dolphins'}
+})
+```
+
+---
+
+## Executing Python with exec
+
+```js
+
+```
 
 ---
 
