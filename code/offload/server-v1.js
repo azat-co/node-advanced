@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt')
 
 const hashPassword = (password, cb) => {
   
-  const hash = bcrypt.hashSync(password, 15) // bcrypt has async but we are using sync here for the example
+  const hash = bcrypt.hashSync(password, 16) // bcrypt has async but we are using sync here for the example
   cb(hash)
 }
 app.use(bodyParser.json())

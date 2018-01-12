@@ -1815,6 +1815,13 @@ Useful Libraries
 
 ##  cluster
 
+
+---
+
+* Master process
+* Worker processes: it's own PID, event loop and memory space
+* Load testing - round robin 
+
 ---
 
 ##  Load testing
@@ -1838,6 +1845,32 @@ loadtest -c 10 --rps 100 10.0.1.4:3000
 
 ##  Offloading CPU-intensive tasks
 
+
+Slow server
+
+node server-v1.js
+
+```
+curl localhost:3000/signup -d '{"password":123}' -H "Content-Type: application/json" -X POST
+curl localhost:3000
+```
+
+---
+
+Server with forked hashing (worker-v2.js)
+
+node server-v2.js
+
+---
+
+
+Server with forked cluster 
+
+node server-v3.js
+
+```js
+
+```
 
 ---
 
