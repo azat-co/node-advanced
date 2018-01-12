@@ -13,6 +13,8 @@ build-lists: true
 # Node Advanced
 ## Overview
 
+![](images/Node-Advanced-x2-1.png)
+
 ![inline 100%](images/azat.jpeg)
 Azat Mardan @azat_co
 
@@ -22,7 +24,6 @@ Azat Mardan @azat_co
 
 # Node Advanced
 
-![](images/Node-Advanced-x2-1.png)
 
 * Videos: <http://node.university/p/node-advanced>
 * Slides: in `*.md` in <https://github.com/azat-co/node-advanced>
@@ -30,7 +31,7 @@ Azat Mardan @azat_co
 
 ---
 
-# Table of Contents
+# Course Overview
 
 --
 
@@ -42,7 +43,13 @@ Azat Mardan @azat_co
 
 ---
 
-## Module 1: Modules
+## Table of Contents
+
+TK update 
+
+---
+
+## Module 1: Node Modules
 
 * How `module.exports` and `require()` actually work
 * npm tricks (scripts) and npm scripts 
@@ -95,7 +102,9 @@ Azat Mardan @azat_co
 ---
 
 
-# What to expect
+## What to expect
+
+Focus on
 
 * Pure Node
 * Core Node
@@ -103,15 +112,19 @@ Azat Mardan @azat_co
 
 ---
 
-# What not to expect
+## What not to expect
 
-* No npm modules
-* No JavaScript
-* No frameworks
+Little or no:
+
+* Fancy npm modules or frameworks 
+* Latest JavaScript
+* No JavaScript fundamentals
+* No Linux, Unix, Windows or computer fundamentals
+* No latest ECMAScript
 
 ---
 
-# Prerequisites
+## Prerequisites
 
 * Node Foundation
 * You Don't Know Node
@@ -120,7 +133,7 @@ Azat Mardan @azat_co
 ---
 
 
-# What you need
+## What you need
 
 * Node version 8+
 * npm version 5+
@@ -129,14 +142,44 @@ Azat Mardan @azat_co
 
 ---
 
-## Module 2: Modules
+## Mindset
+
+* Embrace errors
+* Increase curiosity
+* Experiment by iteration
+* Get comfortable reading source code of Nodejs, npm, and npm modules: you learn how to use a module *and* how to be a better developer
+* Enjoy the process
+
+---
+
+## Tips for Deeper (advanced) understanding
+
+* Learn to think like V8 (a JS+Node engine): When in doubt, use `console.log` or debugger to walk through execution 
+* Read call stack error message carefully. Learn and know common errors (address in use, cannot find module, undefined, etc.)
+* Upgrade your tools (No Notepad ++, seriously)
+
+---
+
+## Tips for Deeper (advanced) understanding (Cont)
+
+* Memorize all the array, string and Node core methods - saves tons of time and keeps focus (can work offline too)
+* Read good books, take in-person classes from good instructors and watch good video courses
+* Build side-projects
+* Subscribe to Node Weekly to stay up-to-date
+* Teach
+
+---
+
+# Module 1: Modules
+
+---
 
 * How `module.exports` and `require()` actually work
 * npm tricks (scripts) and npm scripts 
 
 ---
 
-# `require()`
+## Importing Modules with `require()`
 
 1. Resolving
 1. Loading
@@ -174,11 +217,15 @@ Module {
 
 ---
 
+## `require()`
+
 * local takes precedence 
 * module can be a file or a folder with index.js (or any file specified in package.json main in that nested folder)
 * loaded is true when this file is imported/required by another
 * id is the path when this file is required by another
 * parent and children will be populated accordingly
+
+---
 
 require.resolve() - check if the package exists/installed or not but does not execute
 
@@ -195,10 +242,7 @@ require.resolve() - check if the package exists/installed or not but does not ex
 
 ---
 
-# Exporting
-
-
-
+## Exporting Module
 
 ---
 
@@ -263,13 +307,13 @@ module.exports = () => { // not the same as object {}
 
 ---
 
-# Caching
+## Caching
 
 `require.cache`
 
 ---
 
-# Global
+## Global
 
 ```js
 var limit = 1000 // local, not available outside
@@ -282,7 +326,7 @@ max = 999 // global too
 
 ---
 
-# npm
+## npm
 
 * registry
 * cli: folders, git, private registries (self hosted npm, Nexus, Artifactory)
@@ -292,7 +336,7 @@ max = 999 // global too
 
 ---
 
-# npm Git
+## npm Git
 
 ```
 npm i expressjs/express -E
@@ -386,7 +430,7 @@ npm unlink
 
 ---
 
-# Module 3: Node Event Loop and Async Programming
+# Module 2: Node Event Loop and Async Programming
 
 --
 
@@ -605,7 +649,7 @@ Errors first but the callback last
 
 ---
 
-# Callbacks Syntax 
+## Callbacks Syntax 
 
 ```js
 asyncFn1((error1, data1) => {
@@ -978,7 +1022,16 @@ describe('express rest api server', async () => {
 
 ---
 
-## Module 3: Networking
+# Module 3: Streaming
+
+* reading
+* writing
+* duplex
+* transform
+
+---
+
+# Module 4: Networking
 
 ---
 
@@ -986,7 +1039,7 @@ describe('express rest api server', async () => {
 
 ---
 
-# Any server, not just http or https!
+## Any server, not just http or https!
 
 ```js
 const server = require('net').createServer()
@@ -1048,7 +1101,7 @@ bitcoin-price-ticker.js
 
 ---
 
-# Ticker Server
+## Ticker Server
 
 ```js
 const https = require('https')
@@ -1501,7 +1554,7 @@ server.listen(3000)
 
 ---
 
-# Additional server push articles
+## Additional server push articles
 
 * [What’s the benefit of Server Push?](https://http2.github.io/faq/#whats-the-benefit-of-server-push)
 * [Announcing Support for HTTP/2 Server Push](https://blog.cloudflare.com/announcing-support-for-http-2-server-push-2)
@@ -1509,7 +1562,7 @@ server.listen(3000)
 
 ---
 
-# Demo: Advanced Express REST API routing in HackHall
+## Demo: Advanced Express REST API routing in HackHall
 
 ---
 
@@ -1517,15 +1570,22 @@ server.listen(3000)
 
 Just don't use core http directly. Use Express, Hapi or Koa.
 
----
-
-
-## Module 4: Debugging
 
 ---
 
-## Debugging 
+# Module 5: Debugging
 
+
+---
+
+## Debugging Strategies
+
+* Don't guess and don't think too much
+* Isolate (use binary search)
+* Watch/check values
+* Trial and error
+* Full Stack overflow development (skip question, read answers)
+* Read source code, docs can be outdated or subpar
 
 ---
 
@@ -1593,7 +1653,7 @@ assert // require('assert')
 
 ---
 
-# Console Timers
+## Console Timers
 
 ```js
 console.log('Ethereum transaction started')
@@ -1676,7 +1736,7 @@ $ node --inspect --debug-brk index.js
 
 ---
 
-## Module 4: Scaling
+# Module 6: Scaling
 
 ---
 
@@ -1800,9 +1860,18 @@ cpus.forEach((cpu, i) => {
 
 ---
 
-# Free Memory
+## Free Memory
 
 * `free = 
+
+TK
+
+---
+
+## Garbage collection
+
+TK
+
 ---
 
 Useful Libraries
@@ -1820,7 +1889,25 @@ Useful Libraries
 
 * Master process
 * Worker processes: it's own PID, event loop and memory space
-* Load testing - round robin 
+* Load testing - round robin or the second approach is where the master process creates the listen socket and sends it to interested workers. The workers then accept incoming connections directly.
+* Use the child_process.fork() method and messaging
+
+---
+
+## Round Robin uses shift and push
+
+
+```js
+RoundRobinHandle.prototype.distribute = function(err, handle) {
+  this.handles.push(handle);
+  const worker = this.free.shift();
+
+  if (worker)
+    this.handoff(worker);
+};
+```
+
+Source: <https://github.com/nodejs/node/blob/master/lib/internal/cluster/round_robin_handle.js#L84>
 
 ---
 
@@ -1833,13 +1920,36 @@ npm i loadtest -g
 loadtest -c 10 --rps 100 10.0.1.4:3000
 ```
 
+or
+
+```
+ab -c 200 -t 10 http://localhost:3000
+```
+
 ---
 
-##  Messaging
+## With Cluters
+
+Avoid In-memory caching (each cluster has its own memory) or sticky sessions. Use external state store.
+
+##  Cluster Messaging
 
 ---
 
-##  spawn, fork, exec
+Master:
+
+```js
+cluster.workers
+worker.send(data)
+```
+
+Worker:
+
+```js
+process.on('message', data=>{})
+```
+
+
 
 ---
 
@@ -1874,7 +1984,76 @@ node server-v3.js
 
 ---
 
-## Outro
+Node.js does not automatically manage the number of workers, however. It is the application's responsibility to manage the worker pool based on its own needs.
+
+---
+
+## Fault Tolerance
+
+```
+ps aux | grep 'node'
+kill 12668
+```
+
+---
+
+in `isMaster`:
+
+```js
+  cluster.on('exit', (worker, code, signal) => {
+    if (signal) {
+      console.log(`worker was killed by signal: ${signal}`);
+    } else if (code !== 0) { // &&!worker.exitedAfterDisconnect
+      console.log(`worker exited with error code: ${code}`);
+    } else {
+      console.log('worker success!');
+    }
+    const newWorker = cluster.fork()
+    console.log(`Worker ${worker.process.pid} exited. Thus, starting a new worker ${newWorker.process.pid}`)
+  })
+```
+
+---
+
+## pm2 Basics
+
+```
+npm i -g pm2
+pm2 start app.js Start, Daemonize and auto-restart application (Node)
+pm2 start app.js --watch
+pm2 start app.js --name="bitcoin-exchange-api"
+pm2 reset bitcoin-exchange-api
+pm2 stop all
+pm2 stop bitcoin-exchange-api
+```
+
+---
+
+## pm2 Advanced
+
+```
+pm2 startup
+pm2 save
+pm2 unstartup 
+pm2 start app.js -i 4         # Start 4 instances of application in cluster mode 
+                              # it will load balance network queries to each app
+pm2 start app.js -i 4         # Start auto-detect instances of application in cluster mode  
+pm2 reload all                # Zero Second Downtime Reload
+pm2 scale [app-name] 10       # Scale Cluster app to 10 process
+```
+
+---
+
+## pm2 More
+
+```
+pm2-dev
+pm2-docker
+```
+
+---
+
+# Outro
 
 ---
 
