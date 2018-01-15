@@ -1199,11 +1199,14 @@ streamC.pipe(streamD)
 
 ## Pipe and Transform
 
+Encrypts and Zips:
+
 ```js
-var r = fs.createReadStream('file.txt')
-var z = zlib.createGzip()
-var w = fs.createWriteStream('file.txt.gz')
-r.pipe(z).pipe(w)
+const r = fs.createReadStream('file.txt')
+const e = crypto.createCipher('aes256', SECRET) 
+const z = zlib.createGzip()
+const w = fs.createWriteStream('file.txt.gz')
+r.pipe(e).pipe(z).pipe(w)
 ```
 
 ^Readable.pipe takes writable and returns destination
@@ -1213,6 +1216,31 @@ r.pipe(z).pipe(w)
 ![inline](https://www.dropbox.com/s/hmjw88zwhm0uhur/Screenshot%202018-01-14%2017.40.49.png?dl=0)
 
 ---
+
+## With pipe, we can listen to events too!
+
+```js
+const r = fs.createReadStream('file.txt')
+const e = crypto.createCipher('aes256', SECRET) 
+const z = zlib.createGzip()
+const w = fs.createWriteStream('file.txt.gz')
+r.pipe(e)
+  .pipe(z).on('data', () => process.stdout.write('.') // progress dot "."
+  .pipe(w).on('finish', () => console.log('all is done!')) // when all is done
+```
+
+---
+
+## Readable Stream
+
+paused: `stream.read()` - safe
+`stream.resume()`
+
+flowing: EventEmitter - data can be lost if no listeners or they are not ready
+`stream.pause()`
+
+---
+
 
 ## Create a Stream
 
@@ -1243,15 +1271,70 @@ const translateWritableStream = new Writable({
 
 streams/writable-translate.js
 
+
 ---
 
-## Readable Stream
+## Creating Readable
 
-paused: `stream.read()` - safe
-`stream.resume()`
+---
 
-flowing: EventEmitter - data can be lost if no listeners or they are not ready
-`stream.pause()`
+## Creating Duplex
+
+```js
+const {Duplex} = require('stream')
+
+const MyDuplex = new Duplex ({
+  write(chunk, encoding, callback) {
+    callback()
+  }
+  read(size) {
+    this.push(data) // data defined
+    this.push(null)
+  }
+})
+```
+
+---
+
+## Creating Transform 
+
+```js
+const {Transform} = require('stream')
+
+const MyTransform = new Transform({
+  transform(chunk, encoding, callback) {
+    this.push(data)
+    callback()
+  }
+})
+```
+
+---
+
+## Transform Real Life Example: Zlib from Node Source
+
+```js
+Zlib.prototype._transform = function _transform(chunk, encoding, cb) {
+  // If it's the last chunk, or a final flush, we use the Z_FINISH flush flag
+  // (or whatever flag was provided using opts.finishFlush).
+  // If it's explicitly flushing at some other time, then we use
+  // Z_FULL_FLUSH. Otherwise, use the original opts.flush flag.
+  var flushFlag;
+  var ws = this._writableState;
+  if ((ws.ending || ws.ended) && ws.length === chunk.byteLength) {
+    flushFlag = this._finishFlushFlag;
+  } else {
+    flushFlag = this._flushFlag;
+    // once we've flushed the last of the queue, stop flushing and
+    // go back to the normal behavior.
+    if (chunk.byteLength >= ws.length)
+      this._flushFlag = this._origFlushFlag;
+  }
+  processChunk(this, chunk, flushFlag, cb);
+};
+```
+
+Node source on GitHub: <https://github.com/nodejs/node/blob/master/lib/zlib.js#L395>
 
 ---
 
