@@ -1024,10 +1024,238 @@ describe('express rest api server', async () => {
 
 # Module 3: Streaming
 
-* reading
-* writing
-* duplex
-* transform
+---
+
+
+## Abstractions for continuous chunking of data or simply data which is not available all at once and which does NOT require too much memory.
+
+---
+
+## No need to wait for the entire resource to load
+
+---
+
+## Types of Streams
+
+* Readable, e.g., `fs.createReadStream`
+* Writable, e.g., `fs.createWriteStream`
+* Duplex, e.g., `net.Socket`
+* Transform, e.g., `zlib.createGzip`
+
+---
+
+## Streams Inherit from Event Emitter
+
+---
+
+## Streams are Everywhere!
+
+* HTTP requests and responses
+* Standard input/output (stdin&stdout)
+* File reads and writes
+
+---
+
+## Readable Stream Example
+
+`process.stdin`
+
+Standard input streams contain data going into applications.
+
+---
+
+## This is achieved via a read operation.
+
+---
+
+## Input typically comes from the keyboard used to start the process.
+
+---
+
+To listen in on data from stdin, use the `data` and `end` events:
+
+```js
+// stdin.js
+process.stdin.resume()
+process.stdin.setEncoding('utf8')
+
+process.stdin.on('data', function (chunk) {
+  console.log('chunk: ', chunk)
+})
+
+process.stdin.on('end', function () {
+  console.log('--- END ---')
+})
+```
+
+---
+
+## Demo
+
+`$ node stdin.js`
+
+---
+
+## New Interface `read()`
+
+```js
+var readable = getReadableStreamSomehow()
+readable.on('readable', () => {
+  var chunk
+  while (null !== (chunk = readable.read())) {
+    console.log('got %d bytes of data', chunk.length)
+  }
+})
+```
+
+^readable.read is sync but the chunks are small
+
+---
+
+## Writable Stream Example
+
+* `process.stdout`: Standard output streams contain data going out of the applications.
+* `response` (server request handler response)
+* `request` (client request)
+
+More on networking in the next module
+
+---
+
+
+## Write to Writable Stream
+
+Use `write()` method
+
+```js
+process.stdout.write('A simple message\n')
+```
+
+Data written to standard output is visible on the command line.
+
+---
+
+## What about HTTP?
+
+---
+
+```js
+const http = require('http')
+var server = http.createServer( (req, res) => {
+  req.setEncoding('utf8')
+  req.on('data', (chunk) => {
+    transform(chunk) // This functions is defined somewhere else
+  })
+  req.on('end', () => {  
+    var data = JSON.parse(body)
+    res.end()
+  })
+})
+
+server.listen(1337)
+```
+
+---
+
+TK memory, read file, stream, memory (os), 
+5M lines 2Gb
+
+---
+
+## Pipe
+
+```
+source.pipe(destination)
+```
+
+source - readable or duplex
+destination - writable, or transform or duplex
+
+---
+
+Linux vs Node Piping
+
+Linux shell:
+
+```
+operationA | operationB | operationC | operationD
+```
+
+Node :
+
+```js
+streamA.pipe(streamB).pipe(streamC).pipe(streamD)
+```
+
+or
+
+```js
+streamA.pipe(streamB)
+streamB.pipe(streamC)
+streamC.pipe(streamD)
+```
+
+---
+
+## Pipe and Transform
+
+```js
+var r = fs.createReadStream('file.txt')
+var z = zlib.createGzip()
+var w = fs.createWriteStream('file.txt.gz')
+r.pipe(z).pipe(w)
+```
+
+^Readable.pipe takes writable and returns destination
+
+---
+
+![inline](https://www.dropbox.com/s/hmjw88zwhm0uhur/Screenshot%202018-01-14%2017.40.49.png?dl=0)
+
+---
+
+## Create a Stream
+
+```js
+const stream = require('stream')
+```
+
+---
+
+## Create a Writable Stream
+
+```js
+const translateWritableStream = new Writable({
+  write(chunk, encoding, callback) {
+    translate(chunk.toString(), {to: 'en'}).then(res => {
+        console.log(res.text)
+        //=> I speak English
+        console.log(res.from.language.iso)
+        //=> nl
+        callback()
+    }).catch(err => {
+        console.error(err)
+        callback()
+    })
+  }
+})
+```
+
+streams/writable-translate.js
+
+---
+
+## Readable Stream
+
+paused: `stream.read()` - safe
+`stream.resume()`
+
+flowing: EventEmitter - data can be lost if no listeners or they are not ready
+`stream.pause()`
+
+---
+
+## Backpressure
 
 ---
 
