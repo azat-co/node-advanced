@@ -340,9 +340,19 @@ console.log(arguments)
 ## What You Export === What You Use
 
 ```js
-module.exports = { // use: require('./name.js').parse()
-  parse: () => {}
+module.exports = { 
+  parse: (csv) => {
+    //...
+  }
 }
+```
+
+Importing object, so use: 
+
+```js
+const parse = require('./name.js').parse
+const {parse} = require('./name.js') // or
+parse(csv)
 ```
 
 ---
@@ -350,11 +360,20 @@ module.exports = { // use: require('./name.js').parse()
 ## What You Export === What You Use (Cont)
  
 ```js
-const Parser = { // use again: require('./name.js').parse()
-  parse() {
+const Parser = { 
+  parse(csv) {
+    // ...
   }
 }
 module.exports = Parser
+```
+
+Again importing object, so use: 
+
+```js
+const parse = require('./name.js').parse
+const {parse} = require('./name.js') // or
+parse(csv)
 ```
 
 ---
@@ -364,23 +383,58 @@ module.exports = Parser
 ```js
 module.exports = () => { 
   return {
-    parse: () => {}
+    parse: (csv) => {}
   }
 }
 ```
 
-// not the same as two previous patterns, use 
+Importing function, not object, so use:
 
 ```js
 const {parse} = require('./namejs')()
 const parse = require('./namejs')().parse
 ```
 
-`modules/main-3.js` and `modules/module-3.js`
+(`modules/main-3.js` and `modules/module-3.js`)
 
 ---
 
-`import` and `import()`
+## What You Export === What You Use (Cont)
+
+```js
+class Parser extends BaseClass {
+  parse(csv) {
+    // ...
+  }
+}
+module.exports = Parser
+```
+
+```js
+const Parser = require('./namejs')
+const parser = new Parser()
+const parse = parser.parse // or const {parse} = parser
+```
+
+---
+
+## `import` vs `import()` vs `require()`
+
+* [import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is static and require is dynamic
+* *.mjs experimental https://nodejs.org/api/esm.html
+* import() method ([stage 3](https://github.com/tc39/proposal-dynamic-import))
+* No `require.extensions` or `require.cache` in import 
+
+---
+
+## Node experimental ESM support
+
+```js
+import fs from 'fs'
+import('./button.js')
+```
+
+For now, it's better to use Babel or just stick with `require`
 
 ---
 
