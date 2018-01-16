@@ -440,7 +440,21 @@ For now, it's better to use Babel or just stick with `require`
 
 ## Caching
 
-`require.cache`
+`require.cache` has the cache
+
+---
+
+## Clear Cache
+
+main-4.js prints twice (unlike main-1.js):
+
+```js
+require('./module-4.js')
+delete req
+uire.cache[require.resolve('./module-4.js')]
+require('./module-4.js')
+```
+
 
 ---
 
@@ -529,10 +543,12 @@ Note: The https-proxy doesn't have https as the protocol, but http.
 
 ---
 
--S (default in v5)
--D
--O
--E
+## Dependency Options
+
+* `npm i express -S` (default in npm v5)
+* `npm i express -D`
+* `npm i express -O`
+* `npm i express -E`
 
 ---
 
