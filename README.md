@@ -2,6 +2,7 @@ footer: © NodeProgram.com, Node.University and Azat Mardan 2018
 slidenumbers: true
 theme: Simple, 1
 build-lists: true
+autoscale:true
 
 [.slidenumbers: false] 
 [.hide-footer]
@@ -327,6 +328,8 @@ node
 ```
 
 ---
+
+## Tricky Local Globals 
 
 `exports` and `require` are specific to each module, not true global global, same with `__filename` and `__dirname`
 
@@ -672,16 +675,10 @@ Input/Output examples:
 
 ## Dealing with Slow I/O
 
-* Synchronous
-* Forking
-* Threading 
-* Event loop
-
----
-
-![](https://youtu.be/PNa9OMajw9w?t=5m48s)
-
-<https://youtu.be/PNa9OMajw9w?t=5m48s>
+* Synchronous 
+* Forking (later module)
+* Threading (more servers, computers, VMs, containers)
+* Event loop (this module)
 
 ---
 
@@ -693,10 +690,12 @@ Input/Output examples:
 
 ---
 
+## Call Stack Illustration
+
 ```js
 const f3 = () => {
   console.log('executing f3')
-  undefinedVariableError
+  undefinedVariableError //  ERROR!
 }
 const f2 = () => {
   console.log('executing f2')
@@ -712,16 +711,20 @@ f1()
 
 ---
 
-push to call stack
+## Call Stack as a Bucket
+
+Starts with Anonymous, then f1, f2, etc.
 
 ```
-f3() // last
+f3() // last in the bucket but first to go
 f2()
 f1()
-anonymous() // first
+anonymous() // first in the bucket but last to go
 ```
 
 ---
+
+## Call Stack Error
 
 ```
 > f1()
@@ -751,11 +754,13 @@ FIFO to push to call stack
 
 ---
 
+## Async Callback Messes Call Stack
+
 ```js
 const f3 = () => {
   console.log('executing f3')
   setTimeout(()=>{
-    undefinedVariableError
+    undefinedVariableError // STILL an ERROR but async in this case
   }, 100)
 }
 const f2 = () => {
@@ -772,7 +777,9 @@ f1()
 
 ---
 
-Different call stack. No f1, f2, f3 for the setTimeout callback (comes from event queue)
+## Different Call Stack! 
+
+No f1, f2, f3 for the `setTimeout` callback call stack because event loop moved one, i.e., error comes from a different event queue:
 
 ```
 > f1()
@@ -790,40 +797,119 @@ undefined
 
 ---
 
-## setTimeout vs. setImmediate vs. process.nextTick
 
+## Event Loop Order of Operation:
 
-`setImmediate()` similar to setTimeout with 0 but timing is different sometimes, it is recommended when you need to execute on the next cycle
-`process.nextTick` - making functions fully async (same cycle)
-
----
-
-1. timers
+1. Timers
 1. I/O callbacks
-1. idle, prepare
-1. poll (incoming connections, data)
-1. check
-1. close callbacks
+1. Idle, prepare
+1. Poll (incoming connections, data)
+1. Check
+1. Close callbacks
 
 ^https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/
 
+[.autoscale: true]
+
 ---
 
-## Error-first callback
+## Phases Overview
 
-define:
+1. Timers: this phase executes callbacks scheduled by setTimeout() and setInterval().
+1. I/O callbacks: executes almost all callbacks with the exception of close callbacks, the ones scheduled by timers, and setImmediate().
+1. Idle, prepare: only used internally.
+1. Poll: retrieve new I/O events; node will block here when appropriate.
+1. Check: setImmediate() callbacks are invoked here.
+1. Close callbacks: e.g. socket.on('close', ...).
+
+[.autoscale: true]
+
+---
+
+![](https://youtu.be/PNa9OMajw9w?t=5m48s)
+
+<https://youtu.be/PNa9OMajw9w?t=5m48s>
+
+---
+
+![](images/true-event-loop.png)
+
+---
+
+## setTimeout vs. setImmediate vs. process.nextTick
+
+* `setTimeout(fn, 0)` - pushes to the *next* event loop cycle
+* `setImmediate()` similar to `setTimeout()` with 0 but timing is different sometimes, it is recommended when you need to execute on the next cycle
+* `process.nextTick` - not the next cycle (same cycle!), used to make functions fully async or to postpone code for events
+
+---
+
+## nextTick Usage
+
+All callbacks passed to process.nextTick() will be resolved before the event loop continues
+
+* To emit event after `.on()`
+* To make some sync code async
+
+---
+
+## Event Emit nextTick Example in http
+
+In http, to make sure event listeners are attached before emitting error (or anything else), [source](https://github.com/nodejs/node/blob/3b8da4cbe8a7f36fcd8892c6676a55246ba8c3be/lib/_http_client.js#L205):
+
+```js
+    if (err) {
+      process.nextTick(() => this.emit('error', err));
+      return;
+    }
+```
+
+
+---
+
+## Async or Sync Error Handling in fs
+
+To postpone callback if it's set (async) or throw error right away (sync), [source](https://github.com/nodejs/node/blob/8aec3638cebd338b0ea2a62c3e1469b8e29616d7/lib/fs.js#L363):
+
+```js
+function handleError(val, callback) {
+  if (val instanceof Error) {
+    if (typeof callback === 'function') {
+      process.nextTick(callback, val);
+      return true;
+    } else throw val;
+  }
+  return false;
+}
+```
+
+---
+
+## Async Code Syntax 
+
+* Just Callbacks: code and data are arguments
+* Promises: code is separate from data
+* Generators and Async/await: look like sync but actually async
+
+---
+
+## Error-First Callback
+
+Define your async function:
 
 ```js
 const myFn = (cb) => {
-  // define error and data
-  // do something...
+  // Define error and data
+  // Do something...
   cb(error, data)
 }
 ```
 
 ---
 
-Use: 
+## Error-First Callback Usage
+
+Use your function: 
 
 ```js
 myFn((error, data)=>{
@@ -833,7 +919,9 @@ myFn((error, data)=>{
 
 ---
 
-Argument names don't matter (order does):
+## Arguments Naming
+
+Argument names don't matter but the order does matter, put errors first and callbacks last:
 
 ```js
 myFn((err, result)=>{
@@ -843,35 +931,73 @@ myFn((err, result)=>{
 
 ---
 
-Callbacks not always async
+## Error-First
+
+Errors first but the callback last
+
+> Popular convention but not enforced by Node)
+
+---
+
+## Arguments Order and Callback-First?
+
+Some functions don't follow error-first and use callback first, e.g., `setTimeout(fn, time)`.
+
+---
+
+## Callback-First
+
+With the ES6 rest operator, it might make sense to start using callback-first style more because rest can only be the last parameter, e.g. 
 
 ```js
-arr.map((item, index, list)=>{
-  
+const myFn = (cb, ...options) => {
+
+}
+```
+
+---
+
+## How to Know What is The Function Signature
+
+1. You created it so you should know
+2. Someone else created it, thus, always know others modules by reading source code, checking documentation, testing and reading examples, tests, tutorials.
+
+---
+
+## Callbacks not Always Async
+
+Sync code which has a function as an argument. :
+
+```js
+const arr = [1, 2, 3]
+arr.map((item, index, list) => {
+  return item*index // called arr.length times
 })
 ```
 
 ---
 
-Errors first but the callback last
-
-(Popular convention but not enforced by Node)
-
----
-
 ## Promises
 
-* Consume from a module (axios, koa, etc.)
-* Create your own using ES6 Promise or a library ([bluebird]() or [q](https://documentup.com/kriskowal/q/))
+> Externalize the callback code and separate it from the data arguments
+
+---
+
+## Promises for Developers
+
+* Consume a ready promise from a library/module (`axios`, `koa`, etc.) - most likely
+* Create your own using ES6 Promise or a library ([bluebird]() or [q](https://documentup.com/kriskowal/q/)) - less likely
 
 
 ---
 
-## Usage and consumption of ready promises
+## Usage and Consumption of Ready Promises
 
 ---
 
 ## Callbacks Syntax 
+
+Where to put the callback and does the error argument go first? 
 
 ```js
 asyncFn1((error1, data1) => {
@@ -887,7 +1013,9 @@ asyncFn1((error1, data1) => {
 
 ---
 
-## Promise Syntax Style
+## Promise Syntax
+
+Clear separation of data and control flow arguments:
 
 ```js
 promise1(data1)
@@ -902,11 +1030,9 @@ promise1(data1)
   })
 ```
 
-(separation of data and control flow arguments)
-
 ---
 
-## Axios Example
+## Axios GET Example
 
 ```js
 const axios = require('axios')
@@ -917,19 +1043,23 @@ axios.get('http://azat.co')
 
 ---
 
+## Axios GET Error Example
+
 ```js
 const axios = require('axios')
-axios.get('https://azat.co')
+axios.get('https://azat.co') // https will cause an error!
   .then((response)=>response.data)
   .then(html => console.log(html))
   .catch(e=>console.error(e))
 ```
 
-
-```
 Error: Hostname/IP doesn't match certificate's altnames: "Host: azat.co. is not in the cert's altnames: DNS:*.github.com, DNS:github.com, DNS:*.github.io, DNS:github.io"
-```
 
+---
+
+##  Let's implement our own naive promise. 
+
+### We can learn how easy promises are, and this is advanced course after all so why not?
 
 ---
 
@@ -953,12 +1083,10 @@ myAsyncTimeoutFn('just a silly string argument', () => {
 
 ```js
 function myAsyncTimeoutFn(data) {
-
   let _callback = null
   setTimeout( () => {
     if ( _callback ) callback()
   }, 1000)
-  
   return {
     then(cb){
       _callback = cb
@@ -1035,19 +1163,23 @@ readFilePromise('package.jsan').then( buffer => {
 
 ---
 
-## ES6/ES2015 Promise
+## Creating Promises Using The Standard ES6/ES2015 Promise
+
+---
+
+## ES6/ES2015 Promise in Node
+
+Node version 8+ (v8 not V8):
 
 ```
 Promise === global.Promise
 ```
 
-(Node version 8+)
-
-`Promise` take callback with `resolve` and `reject`
+ES6 `Promise` takes callback with `resolve` and `reject`
 
 ---
 
-## Simple Proper Promise Implementation (from ES6/ES2015)
+## Simple Promise Implementation with ES6/ES2015
 
 ```js
 const fs = require('fs')
@@ -1071,7 +1203,7 @@ readJSON('./package.json').then(console.log)
 
 ---
 
-## Advanced Proper Promise Implementation (from ES6/ES2015) for both promises and callbacks
+## Advanced Promise Implementation with ES6/ES2015 for Both Promises and Callbacks
 
 ```js
 const fs = require('fs')
@@ -1094,11 +1226,11 @@ const readFileIntoArray = function(file, cb = null) {
 
 ---
 
-## Example call
+## Example Calls with `then` and a Callback
 
 ```js
 const printLines = (lines) => {
-  console.log(`there are ${lines.length} line(s)`)
+  console.log(`There are ${lines.length} line(s)`)
   console.log(lines)
 }
 const FILE_NAME = __filename
@@ -1123,16 +1255,13 @@ readFileIntoArray(FILE_NAME, (error, lines) => {
 1. Add listeners `.on()`
 1. Emit `.emit()`
 
+---
+
+TK examples
 
 ---
 
-## Promises vs events
-
-* Events are sync
-* React to same event from multiple places 
-* React to same event multiple times
-
----
+## Working with Events
 
 Events are about building extensible functionality and making modular code flexible
 
@@ -1140,14 +1269,15 @@ Events are about building extensible functionality and making modular code flexi
 * `.on()` can be in the module and `.emit()` in the main program
 * pass data with `emit()`
 * `error` is a special event (if listen to it then no crashes)
-
----
-
 * `on()` execution happen in the order in which they are defined (`prependListener` or `removeListener`)
 
+[.autoscale: true]
+
 ---
 
-* Default maximum listeners is 10 (to find memory leaks), `setMaxListeners` ([source](https://github.com/nodejs/node/blob/master/lib/events.js#L81))
+## Default Max Event Listeners
+
+Default maximum listeners is 10 (to find memory leaks), use `setMaxListeners` ([source](https://github.com/nodejs/node/blob/master/lib/events.js#L81))
 
 ```js
 EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
@@ -1163,7 +1293,17 @@ EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
 
 ---
 
-class 
+## Promises vs Events
+
+* Events are synchronous while Promises are *typically* asynchronous
+* Events react to same event from multiple places, Promise just from one call
+* Events react to same event multiple times, `then` just once
+
+---
+
+## nextTick in class 
+
+Again, nextTick helps to emit events later such as in a class constructor
 
 ```js
 process.nextTick(()=>{
