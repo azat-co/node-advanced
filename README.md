@@ -33,7 +33,7 @@ Azat Mardan @azat_co
 
 # Course Overview
 
---
+---
 
 ## Course Overview
 
@@ -43,101 +43,56 @@ Azat Mardan @azat_co
 
 ---
 
-## Table of Contents
-
-TK update 
+## Curriculum
 
 ---
 
-## Module 1: Node Modules
+## Curriculum
 
-* How `module.exports` and `require()` actually work
-* npm tricks (scripts) and npm scripts 
+1. Node Modules
+1. Node Event Loop and Async Programming
+1. Streaming
+1. Networking
+1. Debugging
+1. Scaling
+
 
 ---
 
-## Module 2: Node Event Loop and Async Programming
+## What to Expect
 
-* Event look
-* Call stack
-* setTimeout, process.nextTick
-* Error-first callback
-* Event Emitters
-* Promises vs events
-* Async/await
-
----
-
-## Module 3: Streaming
-
-* reading
-* writing
-* duplex
-* transform
-
----
-
-## Module 4: Debugging
-
-* Debugging 
-* CPU profiling
-* Networking Debugging with DevTools
-
----
-
-## Module 5: Scaling
-
-* cluster
-* Load testing
-* Messaging
-* spawn, fork, exec
-* Offloading CPU-intensive tasks
-
----
-
-## Outro
-
-* Summary
-
----
-
-
-## What to expect
-
-Focus on
+Focus on:
 
 * Pure Node
-* Core Node
-* ES Next
+* Core Node modules
+* ES6-8
 
 ---
 
-## What not to expect
+## What not to Expect
 
-Little or no:
+Do not expect:
 
-* Fancy npm modules or frameworks 
-* Latest JavaScript
-* No JavaScript fundamentals
-* No Linux, Unix, Windows or computer fundamentals
-* No latest ECMAScript
+* Not much JavaScript fundamentals and no old ES5
+* Not much Linux, Unix, Windows or computer fundamentals
+* Not many fancy npm modules or frameworks 
 
 ---
 
 ## Prerequisites
 
-* Node Foundation
-* You Don't Know Node
-* Node Patterns
+* Node Foundation: <https://node.university/p/node-npm-and-mongodb-foundation>
+* You Don't Know Node: <https://node.university/p/you-dont-know-node>
+* Node Patterns: <https://node.university/p/node-patterns>
 
 ---
 
 
-## What you need
+## What You Need
 
-* Node version 8+
-* npm version 5+
-* Chrome
+* Node version 8+: `node -v`
+* npm version 5+: `npm -v`
+* Google Chrome
 * Slides&code: <https://github.com/azat-co/node-advanced>
 
 ---
@@ -147,12 +102,22 @@ Little or no:
 * Embrace errors
 * Increase curiosity
 * Experiment by iteration
-* Get comfortable reading source code of Nodejs, npm, and npm modules: you learn how to use a module *and* how to be a better developer
+* Get comfortable reading source code of Nodejs, npm, and npm modules
 * Enjoy the process
 
 ---
 
-## Tips for Deeper (advanced) understanding
+## Reading Source Code
+
+You learn how to use a module *and* how to be a better developer
+
+* <https://github.com/nodejs/node>
+* <https://github.com/npm/npm>
+* <https://github.com/expressjs/express>
+
+---
+
+## Tips for Deeper (Advanced) Understanding
 
 * Learn to think like V8 (a JS+Node engine): When in doubt, use `console.log` or debugger to walk through execution 
 * Read call stack error message carefully. Learn and know common errors (address in use, cannot find module, undefined, etc.)
@@ -160,7 +125,7 @@ Little or no:
 
 ---
 
-## Tips for Deeper (advanced) understanding (Cont)
+## Tips for Deeper (Advanced) Understanding (Cont)
 
 * Memorize all the array, string and Node core methods - saves tons of time and keeps focus (can work offline too)
 * Read good books, take in-person classes from good instructors and watch good video courses
@@ -174,11 +139,6 @@ Little or no:
 
 ---
 
-* How `module.exports` and `require()` actually work
-* npm tricks (scripts) and npm scripts 
-
----
-
 ## Importing Modules with `require()`
 
 1. Resolving
@@ -189,7 +149,9 @@ Little or no:
 
 ---
 
-module-1.js:
+## Modules Can Have Code
+
+`code/modules/module-1.js`:
 
 ```js
 console.log(module) // console.log(global.module)
@@ -219,72 +181,177 @@ Module {
 
 ## `require()`
 
-* local takes precedence 
-* module can be a file or a folder with index.js (or any file specified in package.json main in that nested folder)
-* loaded is true when this file is imported/required by another
-* id is the path when this file is required by another
-* parent and children will be populated accordingly
+* local paths takes precedence (0 to N)
+* module can be a file or a folder with `index.js` (or any file specified in package.json main in that nested folder)
+* `loaded` is true when this file is imported/required by another
+* `id` is the path when this file is required by another
+* `parent` and `children` will be populated accordingly
 
 ---
 
-require.resolve() - check if the package exists/installed or not but does not execute
+## `require.resolve()` 
 
-1. try name.js
-1. try name.json
-1. try name.node (compiled addon example)
-1. try name folder
+Check if the package exists/installed or not but does not execute
 
 ---
 
-`require.extensions`
+## How `require()` Checks Files
+
+1. Try `name.js`
+1. Try `name.json`
+1. Try `name.node` (compiled addon example)
+1. Try `name` folder, i.e., `name/index.js`
+
+---
+
+## `require.extensions`
 
 { '.js': [Function], '.json': [Function], '.node': [Function] }
 
 ---
 
-## Exporting Module
+## Caching
+
+Running require() twice will not print twice but just once:
+
+```
+cd code/modules && node
+> require('./module-1.js')
+...
+> require('./module-1.js')
+{}
+```
+
+(Or run `modules/main.js`)
 
 ---
 
-All the same: 
+> A better way to execute code multiple times is to export it and then invoke
 
-```js
-global.module.exports.parse = () => {} 
-module.exports.parse = () => {} 
-exports.parse = () => {} 
+---
+
+
+## Exporting Module
+
+
+---
+
+## Exporting Code
+
+```
+module.exports = () => {
+
+}
 ```
 
 ---
+
+## CSV to Node Object Converter Module
+
+```
+code/modules/module-2.js
+```
+
+```js
+module.exports.parse = (csvString = '') => {
+  const lines = csvString.split('\n')
+  let result = []
+  ...
+  return result
+}
+```
+
+---
+
+## CSV to Node Object Converter Main Program
+
+```
+code/modules/main-2.js
+```
+
+```js
+const csvConverter = require('./module-2.js').parse
+
+const csvString = `id,first_name,last_name,email,gender,ip_address
+...
+10,Allin,Bernadot,abernadot9@latimes.com,Male,15.162.216.199`
+
+console.log(csvConverter(csvString))
+```
+
+---
+
+## Module Patterns
+
+* Export Function
+* Export Class
+* Export Function Factory 
+* Export Object
+* Export Object with Methods
+
+More on these patterns at [Node Patterns](https://node.university/p/node-patterns)
+
+---
+
+## Exporting Tricks and Gotchas
+
+```js
+module.exports.parse = () => {} // ok
+exports.parse = () => {} // ok
+global.module.exports.parse = () => {}  // not ok, use local module
+```
+
+---
+
+## Exporting Tricks and Gotchas (Cont)
 
 ```js
 exports.parse = ()=>{} // ok
-exports = {parse: ()=>{} } // not ok
 module.exports = {parse: ()=>{} } // ok again 
+exports = {parse: ()=>{} } // not ok, creates a new variable
 ```
 
 ---
 
-Function wrapping keeps local vars local
+## Module Wrapper Function
+
+Keeps local vars local
 
 `require('module').wrapper`
 
-exports and require are specific to each module, not true global global, same with `__filename` and `__dirname`
-
-console.log(arguments)
+```
+node
+> require('module').wrapper
+[ '(function (exports, require, module, __filename, __dirname) { ',
+  '\n});' ]
+```
 
 ---
 
+`exports` and `require` are specific to each module, not true global global, same with `__filename` and `__dirname`
+
 ```js
-module.exports = {
+console.log(global.module === module) // false
+console.log(arguments)
+```
+
+---
+
+## What You Export === What You Use
+
+```js
+module.exports = { // use: require('./name.js').parse()
   parse: () => {}
 }
 ```
 
+---
 
+## What You Export === What You Use (Cont)
+ 
 ```js
-const Parser = {
+const Parser = { // use again: require('./name.js').parse()
   parse() {
-
   }
 }
 module.exports = Parser
@@ -292,14 +359,24 @@ module.exports = Parser
 
 ---
 
+## What You Export === What You Use (Cont)
 
 ```js
-module.exports = () => { // not the same as object {}
+module.exports = () => { 
   return {
     parse: () => {}
   }
 }
 ```
+
+// not the same as two previous patterns, use 
+
+```js
+const {parse} = require('./namejs')()
+const parse = require('./namejs')().parse
+```
+
+`modules/main-3.js` and `modules/module-3.js`
 
 ---
 
