@@ -13,3 +13,4 @@ const csvString = `id,first_name,last_name,email,gender,ip_address
 10,Allin,Bernadot,abernadot9@latimes.com,Male,15.162.216.199`
 
 console.log(csvConverter(csvString))
+console.log(require.cache)
