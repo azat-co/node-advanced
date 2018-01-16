@@ -446,7 +446,7 @@ For now, it's better to use Babel or just stick with `require`
 
 ## Clear Cache
 
-main-4.js prints twice (unlike main-1.js):
+`main-4.js` prints twice (unlike `main-1.js`):
 
 ```js
 require('./module-4.js')
@@ -465,7 +465,7 @@ var limit = 1000 // local, not available outside
 const height = 50 // local
 let i = 10 // local
 console = () => {} // global, overwrites console outside
-global.Parser = {} // global
+global.Parser = {} // global, available in other files
 max = 999 // global too
 ```
 
@@ -485,17 +485,24 @@ max = 999 // global too
 
 ```
 npm i expressjs/express -E
-npm ls express
+
 ```
 
 ```
 npm i expressjs/express#4.14.0 -E
+npm install https://github.com/indexzero/forever/tarball/v0.5.6
+npm install git+ssh://git@github.com:npm/npm#semver:^5.0
+npm install git+https://isaacs@github.com/npm/npm.git
 ```
+
+When in doubt: `npm i --dry-run express`
 
 ---
 
+## npm ls 
+
 ```
-npm i --dry-run express
+npm ls express
 npm ls -g --depth=0
 npm ll -g --depth=0
 npm ls -g --depth=0 --json
@@ -503,7 +510,11 @@ npm ls -g --depth=0 --json
 
 npm installs in ~/node_modules (if no local)
 
+
 ---
+
+## Creating package.json For Lazy Programmers
+
 
 ```
 npm init -y
@@ -511,9 +522,41 @@ npm init -y
 
 ---
 
+## Setting Init Configs
+
+List: 
+
 ```
- npm config ls
+npm config ls
 ```
+
+
+---
+
+## My npm Configs: cli, user, global
+
+```
+; cli configs
+scope = ""
+user-agent = "npm/4.2.0 node/v7.10.1 darwin x64"
+
+; userconfig /Users/azat/.npmrc
+init-author-name = "Azat Mardan"
+init-author-url = "http://azat.co/"
+init-license = "MIT"
+init-version = "1.0.1"
+python = "/usr/bin/python"
+
+; node bin location = /Users/azat/.nvm/versions/node/v7.10.1/bin/node
+; cwd = /Users/azat/Documents/Code/node-advanced
+; HOME = /Users/azat
+; "npm config ls -l" to show all defaults.
+```
+
+---
+
+
+## Configs for npm init
 
 ```
 init-author-name = "Azat Mardan"
@@ -524,11 +567,15 @@ init-version = "1.0.1"
 
 ---
 
-## Setting up npm registry
+## Setting up npm registry Config
 
 ```
 npm config set registry "http://registry.npmjs.org/"
 ```
+
+or 
+
+edit `~/.npmrc`, e.g., `/Users/azat/.npmrc`
 
 ---
 
@@ -552,16 +599,18 @@ Note: The https-proxy doesn't have https as the protocol, but http.
 
 ---
 
-`npm update` and `npm outdated`
+## `npm update` and `npm outdated`
 
-`<` and `<=`
-`=`
-`.x`
-`~`
-`^`
-`>` and `>=`
+* `<` and `<=`
+* `=`
+* `.x`
+* `~`
+* `^`
+* `>` and `>=`
 
 ---
+
+## npm Tricks
 
 ```
 npm home express
@@ -569,6 +618,9 @@ npm repo express
 npm docs express
 ```
 
+---
+
+## npm Linking for Developing CLI Tools
 
 ```
 npm link 
@@ -579,18 +631,42 @@ npm unlink
 
 # Module 2: Node Event Loop and Async Programming
 
---
+---
 
 ## Event loop
 
 ---
 
-## Input and Output
+## Two Categories of Tasks
 
-Input/Output Messages are most "expensive" (slow)
+* CPU-bound
+* I/O-bound
 
-* Disk
-* Networking
+---
+
+## CPU Bound Tasks
+
+CPU-bound tasks examples:
+
+* Encryption
+* Password
+* Encoding
+* Compression
+* Calculations
+
+---
+
+## Input and Output Bound Tasks
+
+Input/Output examples:
+
+* Disk: write, read
+* Networking: request, response
+* Database: write, read
+
+---
+
+> CPU-bound tasks are not the bottleneck in networking apps. The I/O tasks are the bottleneck because they take up more time typically.
 
 ---
 
@@ -609,10 +685,9 @@ Input/Output Messages are most "expensive" (slow)
 
 ---
 
-## Call stack
+## Call Stack
 
-push, pop functions
-FILO/LIFO/LCFS - functions removed from top (opposite of queue)
+> Uses push, pop functions on the FILO/LIFO/LCFS basis, i.e., functions removed from top (opposite of queue).
 
 ^https://techterms.com/definition/filo
 
