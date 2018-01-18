@@ -1587,35 +1587,6 @@ Data written to standard output is visible on the command line.
 
 ---
 
-## What about HTTP?
-
----
-
-## Core http uses Streams!
-
-```js
-const http = require('http')
-var server = http.createServer( (req, res) => {
-  req.setEncoding('utf8')
-  req.on('data', (chunk) => { // readable
-    processDataChunk(chunk) // This functions is defined somewhere else
-  })
-  req.on('end', () => {  
-    res.write('ok') // writable
-    res.end()
-  })
-})
-
-server.listen(3000)
-```
-
----
-
-TK memory, read file, stream, memory (os), 
-5M lines 2Gb
-
----
-
 ## Pipe
 
 ```
@@ -1627,7 +1598,7 @@ destination - writable, or transform or duplex
 
 ---
 
-Linux vs Node Piping
+## Linux vs Node Piping
 
 Linux shell:
 
@@ -1648,6 +1619,53 @@ streamA.pipe(streamB)
 streamB.pipe(streamC)
 streamC.pipe(streamD)
 ```
+
+---
+
+
+```
+                                                   +===================+
+                         x-->  Piping functions   +-->   src.pipe(dest)  |
+                         x     are set up during     |===================|
+                         x     the .pipe method.     |  Event callbacks  |
+  +===============+      x                           |-------------------|
+  |   Your Data   |      x     They exist outside    | .on('close', cb)  |
+  +=======+=======+      x     the data flow, but    | .on('data', cb)   |
+          |              x     importantly attach    | .on('drain', cb)  |
+          |              x     events, and their     | .on('unpipe', cb) |
++---------v---------+    x     respective callbacks. | .on('error', cb)  |
+|  Readable Stream  +----+                           | .on('finish', cb) |
++-^-------^-------^-+    |                           | .on('end', cb)    |
+  ^       |       ^      |                           +-------------------+
+  |       |       |      |
+  |       ^       |      |
+  ^       ^       ^      |    +-------------------+         +=================+
+  ^       |       ^      +---->  Writable Stream  +--------->  .write(chunk)  |
+  |       |       |           +-------------------+         +=======+=========+
+  |       |       |                                                 |
+  |       ^       |                              +------------------v---------+
+  ^       |       +-> if (!chunk)                |    Is this chunk too big?  |
+  ^       |       |     emit .end();             |    Is the queue busy?      |
+  |       |       +-> else                       +-------+----------------+---+
+  |       ^       |     emit .write();                   |                |
+  |       ^       ^                                   +--v---+        +---v---+
+  |       |       ^-----------------------------------<  No  |        |  Yes  |
+  ^       |                                           +------+        +---v---+
+  ^       |                                                               |
+  |       ^               emit .pause();          +=================+     |
+  |       ^---------------^-----------------------+  return false;  <-----+---+
+  |                                               +=================+         |
+  |                                                                           |
+  ^            when queue is empty     +============+                         |
+  ^------------^-----------------------<  Buffering |                         |
+               |                       |============|                         |
+               +> emit .drain();       |  ^Buffer^  |                         |
+               +> emit .resume();      +------------+                         |
+                                       |  ^Buffer^  |                         |
+                                       +------------+   add chunk to queue    |
+                                       |            <---^---------------------<
+                                       +============+
+```                                       
 
 ---
 
@@ -1695,11 +1713,85 @@ flowing: EventEmitter - data can be lost if no listeners or they are not ready
 
 ---
 
+## What about HTTP?
+
+---
+
+## Core http uses Streams!
+
+```js
+const http = require('http')
+var server = http.createServer( (req, res) => {
+  req.setEncoding('utf8')
+  req.on('data', (chunk) => { // readable
+    processDataChunk(chunk) // This functions is defined somewhere else
+  })
+  req.on('end', () => {  
+    res.write('ok') // writable
+    res.end()
+  })
+})
+
+server.listen(3000)
+```
+
+---
+
+## Streaming for Servers
+
+`streams/large-file-server.js`:
+
+```js
+const path = require('path')
+const fileName = path.join(
+  __dirname, process.argv[2] || 'webapp.log') // 67Mb
+const fs = require('fs')
+const server = require('http').createServer()
+
+server.on('request', (req, res) => {
+  if (req.url === '/callback') {
+    fs.readFile(fileName, (err, data) => {
+      if (err) return console.error(err)
+      res.end(data)
+    })
+  } else if (req.url === '/stream') {
+    const src = fs.createReadStream(fileName)
+    src.pipe(res)
+  }
+})
+
+server.listen(3000)
+```
+
+---
+
+![inline](images/stream-callback-memory-2.png)
+
+---
+
+![inline](images/stream-stream-memory-2.png)
+
+---
+
+## Before we were consuming streams, not let's create our own stream. This is ~~Sparta~~ advanced course after all!
+
+---
 
 ## Create a Stream
 
 ```js
 const stream = require('stream')
+const writable = new stream.Writable({...})
+const readable = new stream.Readable({...})
+const transform = new stream.Transform({...})
+const duplex = new stream.Duplex({...})
+```
+
+or 
+
+```js
+const {Writable} = require('stream')
+const writable = new Writable({...})
 ```
 
 ---
@@ -1729,6 +1821,25 @@ streams/writable-translate.js
 ---
 
 ## Creating Readable
+
+```js
+const {Readable} = require('stream')
+const Web3 = require('web3')
+const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/jrrVdXuXrVpvzsYUkCYq"))
+
+const latestBlock = new Readable({
+  read(size) {
+    web3.eth.getBlock('latest')
+      .then((x) => {
+        // console.log(x.timestamp)
+        this.push(`${x.hash}\n`)
+        // this.push(null)
+      })
+  }
+})
+
+latestBlock.pipe(process.stdout)
+```
 
 ---
 
@@ -1793,6 +1904,21 @@ Node source on GitHub: <https://github.com/nodejs/node/blob/master/lib/zlib.js#L
 ---
 
 ## Backpressure
+
+* Data clogs 
+* Reading typically is faster than writing
+* Backpressure is bad for memory exhaustion and GC (triggering GC too often is expensive)
+* Stream and Node solves the back pressure automatically by pausing source (read) stream if needed
+* `highWaterMark` option, defaults to 16kb
+
+---
+
+## Overwrite Streams
+
+Since Node.js v0.10, the Stream class has offered the ability to modify the behaviour of the .read() or .write() by using the underscore version of these respective functions (._read() and ._write()).
+
+[Guide](https://nodejs.org/en/docs/guides/backpressuring-in-streams)
+
 
 ---
 
