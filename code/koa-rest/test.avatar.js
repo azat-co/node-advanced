@@ -37,5 +37,6 @@ describe('express rest api server', async () => {
 after(()=> {
   server.close(()=>{
     console.log('all is done, bye')
+    // process.exit(0)
   })
 })

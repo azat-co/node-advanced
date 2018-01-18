@@ -1257,7 +1257,54 @@ readFileIntoArray(FILE_NAME, (error, lines) => {
 
 ---
 
-TK examples
+## Emitting Outside Event Emitter Class
+
+
+```js
+const events = require('events')
+class Encrypt extends events {
+  constructor(ops) {
+    super(ops)
+    this.on('start', () => {
+      console.log('beginning A')
+    })    
+    this.on('start', () => {
+      console.log('beginning B')
+    })
+  }
+}
+
+const encrypt = new Encrypt()
+encrypt.emit('start')
+```
+
+---
+
+## Emitting Outside and Inside
+
+```js
+const events = require('events')
+class Encrypt extends events {
+  constructor(ops) {
+    super(ops)
+    this.on('start', () => {
+      console.log('beginning A')
+    })    
+    this.on('start', () => {
+      console.log('beginning B')
+      setTimeout(()=>{
+        this.emit('finish', {msg: 'ok'})
+      }, 0)
+    })
+  }
+}
+
+const encrypt = new Encrypt()
+encrypt.on('finish', (data) => {
+  console.log(`Finshed with message: ${data.msg}`)
+})
+encrypt.emit('start')
+```
 
 ---
 
@@ -1266,7 +1313,7 @@ TK examples
 Events are about building extensible functionality and making modular code flexible
 
 * `.emit()` can be in the module and `.on()` in the main program which consumes the module
-* `.on()` can be in the module and `.emit()` in the main program
+* `.on()` can be in the module and `.emit()` in the main program, and in constructor or in instance
 * pass data with `emit()`
 * `error` is a special event (if listen to it then no crashes)
 * `on()` execution happen in the order in which they are defined (`prependListener` or `removeListener`)
@@ -1280,6 +1327,8 @@ Events are about building extensible functionality and making modular code flexi
 Default maximum listeners is 10 (to find memory leaks), use `setMaxListeners` ([source](https://github.com/nodejs/node/blob/master/lib/events.js#L81))
 
 ```js
+var defaultMaxListeners = 10;
+...
 EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
   if (typeof n !== 'number' || n < 0 || isNaN(n)) {
     const errors = lazyErrors();
@@ -1306,9 +1355,15 @@ EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
 Again, nextTick helps to emit events later such as in a class constructor
 
 ```js
-process.nextTick(()=>{
-  this.emit()
-})
+class Encrypt extends events {
+  constructor() {
+    process.nextTick(()=>{  // otherwise, emit will happen before .on('ready')
+      this.emit('ready', {})
+    })
+  }
+}
+const encrypt = new Encrypt()
+encrypt.on('ready', (data) => {})
 ```
 
 ---
@@ -1316,6 +1371,17 @@ process.nextTick(()=>{
 ## Async/await
 
 ---
+
+## How Developers Use Async/await 
+
+* Consume ready async/await functions from libraries which support it - often
+* Create your own from callback or promises - not often (Node's `util.promisify`)
+
+You need Node v8+ for both
+
+---
+
+## Consuming Async Fn from axios
 
 ```js
 const axios = require('axios')
@@ -1328,7 +1394,7 @@ getAzatsWebsite().then(console.log)
 
 ---
 
-## Util.promisify
+## `util.promisify`
 
 ```js
 const util = require('util')
@@ -1343,7 +1409,11 @@ const f = async function() {
 f()
 ```
 
+(Can be use just for Promises as well)
+
 ---
+
+## Consuming Async Fn from mocha and axios
 
 ```js
 const axios = require('axios')
@@ -1352,23 +1422,33 @@ const app = require('../server.js')
 const port = 3004
 
 before(async function() {
-  await app.listen(port, ()=>{console.log('server is running')})
+  await app.listen(port, () => {
+    console.log('server is running')
+  })
   console.log('code after the server is running')
 })
+```
 
+---
+
+## Consuming Async Fn from mocha and axios (Cont)
+
+```js
 describe('express rest api server', async () => {
   let id
 
   it('posts an object', async () => {
-    const {data: body} = await axios.post(`http://localhost:${port}/collections/test`, { name: 'John', email: 'john@rpjs.co'})
+    const {data: body} = await axios
+      .post(`http://localhost:${port}/collections/test`, 
+      { name: 'John', email: 'john@rpjs.co'})
     expect(body.length).to.eql(1)
     expect(body[0]._id.length).to.eql(24)
     id = body[0]._id
   })
 
   it('retrieves an object', async () => {
-    const {data: body} = await axios.get(`http://localhost:${port}/collections/test/${id}`)
-    // console.log(body)
+    const {data: body} = await axios
+      .get(`http://localhost:${port}/collections/test/${id}`)
     expect(typeof body).to.eql('object')
     expect(body._id.length).to.eql(24)
     expect(body._id).to.eql(id)
@@ -1380,14 +1460,26 @@ describe('express rest api server', async () => {
 
 ---
 
-## Project: Koa Server with Mocha (async/await)
+## Project: Avatar Service
+
+Koa Server with Mocha and Async/await Fn and Promise.all
+
+Terminal:
+
+```
+cd code
+cd koa-rest
+npm i
+npm start
+```
+
+Open in a Browser: <http://localhost:3000/?email=YOUEMAIL>, e.g., <http://localhost:3000/?email=hi@node.university> to see your avatar (powered by Gravatar)
 
 ---
 
 # Module 3: Streaming
 
 ---
-
 
 ## Abstractions for continuous chunking of data or simply data which is not available all at once and which does NOT require too much memory.
 
@@ -1424,15 +1516,13 @@ describe('express rest api server', async () => {
 
 Standard input streams contain data going into applications.
 
----
+* Event data: `on('data')`
+*  `read()` method
 
-## This is achieved via a read operation.
 
 ---
 
 ## Input typically comes from the keyboard used to start the process.
-
----
 
 To listen in on data from stdin, use the `data` and `end` events:
 
@@ -1458,13 +1548,13 @@ process.stdin.on('end', function () {
 
 ---
 
-## New Interface `read()`
+## Interface `read()`
 
 ```js
 var readable = getReadableStreamSomehow()
 readable.on('readable', () => {
   var chunk
-  while (null !== (chunk = readable.read())) {
+  while (null !== (chunk = readable.read())) { // SYNC!
     console.log('got %d bytes of data', chunk.length)
   }
 })
@@ -1501,20 +1591,22 @@ Data written to standard output is visible on the command line.
 
 ---
 
+## Core http uses Streams!
+
 ```js
 const http = require('http')
 var server = http.createServer( (req, res) => {
   req.setEncoding('utf8')
-  req.on('data', (chunk) => {
-    transform(chunk) // This functions is defined somewhere else
+  req.on('data', (chunk) => { // readable
+    processDataChunk(chunk) // This functions is defined somewhere else
   })
   req.on('end', () => {  
-    var data = JSON.parse(body)
+    res.write('ok') // writable
     res.end()
   })
 })
 
-server.listen(1337)
+server.listen(3000)
 ```
 
 ---

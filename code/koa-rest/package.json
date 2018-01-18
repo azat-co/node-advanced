@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha test.avatar.js"
+    "test": "node_modules/.bin/mocha test.avatar.js",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "Azat Mardan (http://azat.co/)",
