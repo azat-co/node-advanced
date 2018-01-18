@@ -1542,7 +1542,7 @@ process.stdin.on('end', function () {
 
 ---
 
-## Demo
+## Readable stdin Stream Demo
 
 `$ node stdin.js`
 
@@ -1574,7 +1574,6 @@ More on networking in the next module
 
 ---
 
-
 ## Write to Writable Stream
 
 Use `write()` method
@@ -1584,6 +1583,14 @@ process.stdout.write('A simple message\n')
 ```
 
 Data written to standard output is visible on the command line.
+
+---
+
+## Writable stdout Stream Demo
+
+```
+node stdout.js
+```
 
 ---
 
@@ -1622,6 +1629,13 @@ streamC.pipe(streamD)
 
 ---
 
+![left fit](images/pipe.png)
+
+How `pipe` really works: readable source will be paused if the queue for the writable/transform/duplex destination stream is full. Otherwise, the readable will be resumed and read. <sup>[source](https://nodejs.org/en/docs/guides/backpressuring-in-streams)</sup>
+
+[.footer:hide]
+
+---
 
 ```
                                                    +===================+
@@ -2511,7 +2525,7 @@ server.listen(3000)
 
 ---
 
-## Demo: Advanced Express REST API routing in HackHall
+## Advanced Express REST API Routing in HackHall Demo 
 
 ---
 
@@ -2551,7 +2565,7 @@ server.listen(3000)
 
 ---
 
-## Streaming logs to files
+## Streaming Logs to Files
 
 ```js
 const fs = require('fs')
@@ -2569,6 +2583,8 @@ setInterval(() => {
 
 ---
 
+## Console Parameters
+
 ```js
 console.log('Step', 2) // Step2
 const name = 'Azat'
@@ -2578,15 +2594,23 @@ console.log('Hello %s from %s', name, city)
 
 ---
 
+## `util.format` and `util.inspect`
+
 ```js
 const util = require('util')
-console.log(util.format('Hello %s from %s', name, city)) // Hello Azat from San Francisco
-console.log('Hello %s from %s', 'Azat', {city: 'San Francisco'}) // Hello Azat from [object Object]
-console.log({city: 'San Francisco'}) // { city: 'San Francisco' }
-console.log(util.inspect({city: 'San Francisco'})) // { city: 'San Francisco' }
+console.log(util.format('Hello %s from %s', name, city)) 
+// Hello Azat from San Francisco
+console.log('Hello %s from %s', 'Azat', {city: 'San Francisco'}) 
+// Hello Azat from [object Object]
+console.log({city: 'San Francisco'}) 
+// { city: 'San Francisco' }
+console.log(util.inspect({city: 'San Francisco'})) 
+// { city: 'San Francisco' }
 ```
 
 ---
+
+## `console.dir()`
 
 ```js
 const str = util.inspect(global, {depth: 0})
@@ -2608,7 +2632,8 @@ assert // require('assert')
 console.log('Ethereum transaction started')
 console.time('Ethereum transaction')
 web3.send(txHash, (error, results)=>{
-  console.timeEnd('Ethereum transaction') // Ethereum transaction: 4545.921ms
+  console.timeEnd('Ethereum transaction') 
+  // Ethereum transaction: 4545.921ms
 })
 ```
 
@@ -2639,6 +2664,9 @@ debug>
 
 ---
 
+
+## Node CLI Debugger (Cont)
+
 ```
 Stepping#
 cont, c - Continue execution
@@ -2660,7 +2688,7 @@ To start debugging, open the following URL in Chrome:
 ```
 
 
-better to break right away:
+Better to break right away:
 
 ```
 $ node --inspect --debug-brk index.js
@@ -2709,7 +2737,7 @@ $ node --inspect --debug-brk index.js
 
 ---
 
-## Offload the workload
+## Offload the Workload
 
 * `spawn()` - events, stream, messages, no size limit, no shell
 * `fork()` - Node processes, exchange messages
@@ -2718,6 +2746,8 @@ $ node --inspect --debug-brk index.js
 
 ---
 
+## Sync Processes (Dumb)
+
 * `spawnSync()`
 * `execFileSync()`
 * `execSync()`
@@ -2725,7 +2755,7 @@ $ node --inspect --debug-brk index.js
 
 ---
 
-## Executing bash and spawn params
+## Executing bash and Spawn params
 
 ```js
 const {spawn} = require('child_process')
@@ -2739,11 +2769,104 @@ spawn('cd $HOME/Downloads && find . -type f | wc -l',
 
 ---
 
-## Executing Python with exec
+## Good Examples of Offloading the Workload
+
+* Hashing
+* Encryption
+* Requests
+* Encoding
+* Archiving/Compression
+* Computation
+
+---
+
+## Let's use Node to launch Python script to securely (512) hash a long string and get results back into Node.
+
+---
+
+## Executing Python with `exec()`
+
+`code/exec-hash.js`:
 
 ```js
+const {exec} = require('child_process')
+console.time('hashing')
+const str = 'React Quickly: Painless web apps with React, JSX, Redux, and GraphQL'.repeat(100)
+exec(`STR="${str}" python ${__dirname}/py-hash.py`, (error, stdout, stderr) => {
+  if (error) return console.error(error)
+  console.timeEnd('hashing')
+  console.log(stdout)
+})
 
+console.log('could be doing something else')
 ```
+
+---
+
+## Python SHA512 Hashing
+
+`code/py-hash.py`:
+
+```py
+import os
+str = os.environ['STR'] 
+import hashlib
+hash_object = hashlib.sha512(str.encode())
+hex_dig = hash_object.hexdigest()
+print(hex_dig)
+```
+
+---
+
+## Let's launch Ruby script to encrypt a string from Node with AES into a file and not wait for it.
+
+---
+
+## Node Sends a Long String for Encryption to Ruby
+
+```js
+const {spawn} = require('child_process')
+const str = 'React Quickly: Painless web apps with React, JSX, Redux, and GraphQL'.repeat(100)
+console.time('launch encryption')
+
+const rubyEncrypt = spawn('ruby', ['encrypt.rb'], {
+  env: {STR: str},
+  detached: true,
+  stdio: 'ignore'
+})
+rubyEncrypt.unref() // Do not wait cause the results will be in the file.
+
+console.timeEnd('launch encryption')
+```
+
+---
+
+## Ruby Script is Encrypting with AES 256
+
+```rb
+require 'openssl'
+cipher = OpenSSL::Cipher.new('aes-256-cbc')
+cipher.encrypt # We are encrypting
+key = cipher.random_key
+iv = cipher.random_iv
+
+encrypted_string = cipher.update ENV["STR"]
+encrypted_string << cipher.final
+File.write('ruby-encrypted.txt', encrypted_string)
+```
+
+---
+
+## Quick Summary About Spawn
+
+* Use params to pass data around
+* Offload work to other processes even when they are in other languages
+* Compare timing
+
+
+---
+
+> Scaling by forking will require the core `os` module.
 
 ---
 
@@ -2763,6 +2886,8 @@ console.log(os.networkInterface())
 
 ---
 
+## Network Interface Results
+
 ```
 { lo0:
    [ { address: '127.0.0.1',
@@ -2780,6 +2905,8 @@ console.log(os.networkInterface())
   ...  
 ```  
 
+macOS terminal command to get the same IP:
+
 ```
 ifconfig | grep "inet " | grep -v 127.0.0.1
 ```
@@ -2788,19 +2915,18 @@ ifconfig | grep "inet " | grep -v 127.0.0.1
 
 ## CPU Usage in %
 
+`code/os-cpu.js`:
+
 ```js
-//os-cpu.js
 const os = require('os')
 let cpus = os.cpus()
 
 cpus.forEach((cpu, i) => {
   console.log('CPU %s:', i)
   let total = 0
-
   for (let type in cpu.times) {
     total += cpu.times[type]
   }
-
   for (let type in cpu.times) {
     console.log(`\t ${type} ${Math.round(100 * cpu.times[type] / total)}%`)
   }
@@ -2831,7 +2957,7 @@ Useful Libraries
 
 ---
 
-##  cluster
+## The Core `cluster` Module
 
 
 ---
@@ -2844,7 +2970,6 @@ Useful Libraries
 ---
 
 ## Round Robin uses shift and push
-
 
 ```js
 RoundRobinHandle.prototype.distribute = function(err, handle) {
@@ -2860,16 +2985,20 @@ Source: <https://github.com/nodejs/node/blob/master/lib/internal/cluster/round_r
 
 ---
 
-##  Load testing
+##  Load Testing
 
 ---
+
+## Load/Stress Testing Tools
+
+Node loadtest:
 
 ```
 npm i loadtest -g
 loadtest -c 10 --rps 100 10.0.1.4:3000
 ```
 
-or
+or Apache ab
 
 ```
 ab -c 200 -t 10 http://localhost:3000
@@ -2877,13 +3006,14 @@ ab -c 200 -t 10 http://localhost:3000
 
 ---
 
-## With Cluters
+## With Clusters
 
 Avoid In-memory caching (each cluster has its own memory) or sticky sessions. Use external state store.
 
+---
+
 ##  Cluster Messaging
 
----
 
 Master:
 
@@ -2898,46 +3028,156 @@ Worker:
 process.on('message', data=>{})
 ```
 
+---
+
+##  Optimizing a Slow Password Salting+Hashing Server 
+
+---
+
+## A sync function which is a very CPU-Intensive task 
+
+`offload/server-v1.js`:
+
+```js
+// ...
+const bcrypt = require('bcrypt')
+
+const hashPassword = (password, cb) => {
+  const hash = bcrypt.hashSync(password, 16) // bcrypt has async but we are using sync here for the example
+  cb(hash)
+}
+// ...
+app.post('/signup', (req, res) => {
+  hashPassword(req.body.password.toString(), (hash) => { // callback but sync
+    // Store hash in your password DB.
+    res.send('your credentials are stored securely')
+  })
+})
+app.listen(3000)
+```
 
 
 ---
 
-##  Offloading CPU-intensive tasks
+## Benchmarking The Password Salting+Hashing Server
 
+Terminal:
 
-Slow server
-
+```
 node server-v1.js
+```
+
+Another terminal (not the first terminal):
 
 ```
 curl localhost:3000/signup -d '{"password":123}' -H "Content-Type: application/json" -X POST
+```
+
+Third terminal window/tab:
+
+```
 curl localhost:3000
 ```
 
 ---
 
-Server with forked hashing (worker-v2.js)
+## Optimizing The Password Salting+Hashing Server
 
-node server-v2.js
+Server with forked hashing `code/offload/worker-v2.js`:
+
+```js
+const bcrypt = require('bcrypt')
+
+process.on('message', (password) => {
+  const hash = bcrypt.hashSync(password, 16)
+  process.send(hash)
+})
+```
 
 ---
 
+## Optimizing Server (Cont)
 
-Server with forked cluster 
-
-node server-v3.js
+Optimized server `code/offload/server-v2.js`:
 
 ```js
+const hashPassword = (password, cb) => {
+  const hashWorker = fork('worker-v2.js')
+  hashWorker.send(password)
+  hashWorker.on('message', hash => {
+    cb(hash)
+  })
+}
+app.use(bodyParser.json())
+app.get('/', (req, res) => {
+  res.send('welcome to strong password site')
+})
+
+app.post('/signup', (req, res) => {
+  hashPassword(req.body.password.toString(), (hash) => { // callback but sync
+    // Store hash in your password DB.
+    res.send('your credentials are stored securely')
+  })
+})
 
 ```
 
 ---
 
-Node.js does not automatically manage the number of workers, however. It is the application's responsibility to manage the worker pool based on its own needs.
+## We can fork the v1 server without splitting the hashing+salting function into a worker
 
 ---
 
-## Fault Tolerance
+
+## Server With a Forked Cluster 
+
+node server-v3.js
+
+```js
+const express = require('express')
+const app = express()
+const path = require('path')
+const bodyParser = require('body-parser')
+const bcrypt = require('bcrypt')
+
+const cluster = require('cluster')
+
+if (cluster.isMaster) {
+  const os = require('os')
+  os.cpus().forEach(() => {
+    const worker = cluster.fork()
+    console.log(`Started worker ${worker.process.pid}`)
+  })
+  return true
+} 
+// cluster.isWorker === true
+const hashPassword = (password, cb) => {  
+  const hash = bcrypt.hashSync(password, 16) // bcrypt has async but we are using sync here for the example
+  cb(hash)
+}
+
+app.use(bodyParser.json())
+app.get('/', (req, res) => {
+  res.send('welcome to strong password site')
+})
+
+app.post('/signup', (req, res) => {
+  hashPassword(req.body.password.toString(), (hash) => { // callback but sync
+    // Store hash in your password DB.
+    res.send('your credentials are stored securely')
+  })
+})
+
+app.listen(3000)
+```
+
+---
+
+> Node.js does not automatically manage the number of workers, however. It is the application's responsibility to manage the worker pool based on its own needs.
+
+---
+
+## No Fault Tolerance
 
 ```
 ps aux | grep 'node'
@@ -2946,7 +3186,7 @@ kill 12668
 
 ---
 
-in `isMaster`:
+in `isMaster` in `code/offload/server-v4.js`:
 
 ```js
   cluster.on('exit', (worker, code, signal) => {
@@ -2961,6 +3201,19 @@ in `isMaster`:
     console.log(`Worker ${worker.process.pid} exited. Thus, starting a new worker ${newWorker.process.pid}`)
   })
 ```
+
+---
+
+## Fault Tolerance
+
+```
+ps aux | grep 'node'
+kill 12668
+```
+
+---
+
+> `cluster` is good but `pm2` is better
 
 ---
 
@@ -3007,3 +3260,13 @@ pm2-docker
 ---
 
 ## Summary
+
+* Debugging
+* Console, Node REPL and npm tricks
+* Forking and spawning
+* Creating streams, async/await and naive promises
+* How really globals, modules and require() work
+
+---
+
+# The End!
