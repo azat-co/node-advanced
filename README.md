@@ -1937,7 +1937,7 @@ const server = require('net').createServer()
 server.on('connection', socket => {
   socket.write('Enter your command: ') // Sent to client
   socket.on('data', data => {
-    // incoming data from a client
+    // Incoming data from a client
   })
 
   socket.on('end', () => {
@@ -1945,7 +1945,7 @@ server.on('connection', socket => {
   })
 })
 
-server.listen(8000, () => console.log('Server bound'))
+server.listen(3000, () => console.log('Server bound'))
 ```
 
 ---
@@ -1973,22 +1973,22 @@ Object.entries(sockets).forEach(([key, cs]) => {
 ## Client?
 
 ```
-telnet localhost 8000
+telnet localhost 3000
 ```
 
 or
 
 ```
-nc localhost 8000
+nc localhost 3000
 ```
 
 or write your own TCP/IP client using Node, C++, Python, etc.
 
 ---
 
-## Demo: Bitcoin Price Ticker 
+## Bitcoin Price Ticker 
 
-bitcoin-price-ticker.js
+`node code/bitcoin-price-ticker.js`
 
 ---
 
@@ -2017,12 +2017,12 @@ server.on('connection', socket => {
   })
 })
 
-server.listen(8000, () => console.log('Server bound'))
+server.listen(3000, () => console.log('Server bound'))
 ```
 
 ---
 
-processing data from the client:
+## Processing Data from the Client
 
 ```js
     let currency = data.toString().trim()
@@ -2053,14 +2053,18 @@ API: https://api.coindesk.com/v1/bpi/currentprice/<CODE>.json
 ---
 
 
-```js
+## Response
+
+```json
 {
   "time": {
     "updated": "Jan 9, 2018 19:52:00 UTC",
     "updatedISO": "2018-01-09T19:52:00+00:00",
     "updateduk": "Jan 9, 2018 at 19:52 GMT"
   },
-  "disclaimer": "This data was produced from the CoinDesk Bitcoin Price Index (USD). Non-USD currency data converted using hourly conversion rate from openexchangerates.org",
+  "disclaimer": "This data was produced from the CoinDesk 
+  Bitcoin Price Index (USD). Non-USD currency data 
+  converted using hourly conversion rate from openexchangerates.org",
   "bpi": {
     "USD": {
       "code": "USD",
@@ -2074,6 +2078,7 @@ API: https://api.coindesk.com/v1/bpi/currentprice/<CODE>.json
 
 ---
 
+## HTTPS GET
 
 ```js
 const fetchBTCPrice = (currency, socket) => {
@@ -2099,8 +2104,10 @@ const fetchBTCPrice = (currency, socket) => {
 
 ---
 
+## Client
+
 ```
-telnet localhost 8000
+telnet localhost 3000
 Trying 127.0.0.1...
 Connected to localhost.
 Escape character is '^]'.
@@ -2147,6 +2154,8 @@ const server = require('http').createServer((req, res) => {
 
 ---
 
+## HTTP File Server
+
 Command to run the server:
 
 ```
@@ -2156,6 +2165,8 @@ SECRET=NNN nodemon file-server.js
 Browser request: <http://localhost:3000/courses/123?API_KEY=NNN>
 
 ---
+
+## HTTP Routing
 
 You can use switch... 
 
@@ -2183,6 +2194,7 @@ const server = require('http').createServer((req, res) => {
 
 ---
 
+## HTTP Routing Puzzle
 
 Find a problem with this server (from [Advanced Node by Samer Buna](https://app.pluralsight.com/player?course=nodejs-advanced&author=samer-buna&name=nodejs-advanced-m5&clip=3&mode=live)):
 
@@ -2217,6 +2229,7 @@ server.listen(3000)
 
 ---
 
+## Puzzle Answer
 
 Always reading (no caching) and blocking!
 
@@ -2230,7 +2243,7 @@ Always reading (no caching) and blocking!
 
 ---
 
-## Use Status Codes
+## Use HTTP Status Codes
 
 ```
 http.STATUS_CODES
@@ -2238,9 +2251,7 @@ http.STATUS_CODES
 
 ---
 
-
-
-## https
+## Core `https` Module
 
 Server needs the key and certificate files:
 
@@ -2251,7 +2262,7 @@ openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/C=US/ST=CA/L=SF/O=NO\x
 
 ---
 
-https server:
+## HTTPS Server with Core `https` Module
 
 ```js
 const https = require('https')
@@ -2268,7 +2279,7 @@ const server = https.createServer({
 
 ---
 
-https request with streaming
+## `https` Request with Streaming
 
 ```js
 const https = require('https') 
@@ -2296,10 +2307,11 @@ req.end()
 ---
 
 
-## http2
-
+## HTTP/2 with `http2`
 
 ---
+
+## Generating Self-Signed SSL
 
 ```
 openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/C=US/ST=CA/L=SF/O=NO\x08A/OU=NA' \
@@ -2309,6 +2321,8 @@ openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/C=US/ST=CA/L=SF/O=NO\x
 
 ---
 
+## Using Core `http2` Module
+
 ```js
 const http2 = require('http2')
 const fs = require('fs')
@@ -2317,13 +2331,71 @@ const server = http2.createSecureServer({
   key: fs.readFileSync('server.key'),
   cert: fs.readFileSync('server.crt')
 }, (req, res) => {
-  res.end('hello')
+  res.writeHead(200, {'Content-Type': 'text/plain' })
+  res.end('<h1>Hello World</h1>') // JUST LIKE HTTP!
 })
 server.on('error', (err) => console.error(err))
 server.listen(3000)
 ```
 
+
 ---
+
+## Running H2 Hello Server
+```
+cd code
+cd http2
+node h2-hello.js
+```
+
+Browser: <https://localhost:3000>
+
+Terminal:
+
+```
+curl https://localhost:3000/ -vik
+```
+
+---
+
+![inline](images/http2-click-on-advanced.png)
+
+---
+
+![inline](images/http2-click-on-proceed.png)
+
+---
+
+![inline](images/http2-localhost-request.png)
+
+---
+
+![inline](images/http2-inspecting-self-signed.png)
+
+---
+
+```
+curl https://localhost:3000/ -vik
+```
+
+```
+ Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 3000 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* Cipher selection:
+...
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256
+* ALPN, server accepted to use h2
+* Server certificate:
+*  subject: C=US; ST=CA; L=SF; O=NOx08A; OU=NA
+* Using HTTP2, server supports multi-use
+* Connection state changed (HTTP/2 confirmed)
+```
+
+---
+
+## Using Core `http2` Module with Stream
 
 ```js
 const http2 = require('http2')
@@ -2351,59 +2423,43 @@ server.listen(3000)
 
 ---
 
-![inline](images/http2-click-on-advanced.png)
+## WTF is http2 Server Push?
 
 ---
 
-![inline](images/http2-click-on-proceed.png)
+## Example: index.html refers to four static assets
+
+HTTP/1: server requires five requests from a client:
+
+1. index.html
+2. style.css
+3. bundle.js
+4. favicon.ico
+5. logo.png
 
 ---
 
-![inline](images/http2-localhost-request.png)
+## Example: index.html refers to four static assets (Cont)
+
+HTTP/2: server with server push requires just one request from a client: 
+
+1. index.html
+  * style.css
+  * bundle.js
+  * favicon.ico
+  * logo.png
 
 ---
 
-![inline](images/http2-inspecting-self-signed.png)
+> HTML and assets are pushed by the server but assets are not used unless referred to by HTML.
 
 ---
 
-```
-$ curl https://localhost:3000/ -vik
-```
-
-```
- Trying 127.0.0.1...
-* Connected to localhost (127.0.0.1) port 3000 (#0)
-* ALPN, offering h2
-* ALPN, offering http/1.1
-* Cipher selection:
-...
-* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256
-* ALPN, server accepted to use h2
-* Server certificate:
-*  subject: C=US; ST=CA; L=SF; O=NOx08A; OU=NA
-* Using HTTP2, server supports multi-use
-* Connection state changed (HTTP/2 confirmed)
-```
+## Let's implement some server push!
 
 ---
 
-## http2 Server Push
-
----
-
-HTTP/1 makes two requests:
-
-1. HTML: index.html refers to static assets
-2. Assets: style.css + bundle.js + favicon.ico + logo.png
-
-HTTP/2 with server push just one:
-
-1. HTML and assets are pushed by the server
-
-(Assets are not used unless referred to by HTML)
-
----
+## Start with a Normal H2 Server
 
 ```js
 const http2 = require('http2')
@@ -2419,6 +2475,8 @@ server.on('socketError', (err) => console.error(err))
 ```
 
 ---
+
+## Use Stream and `pushStream`
 
 ```js
 server.on('stream', (stream, headers) => {
@@ -2459,7 +2517,7 @@ server.listen(3000)
 
 ## Conclusion
 
-Just don't use core http directly. Use Express, Hapi or Koa.
+### Just don't use core http directly. Use Express, Hapi or Koa.
 
 
 ---
