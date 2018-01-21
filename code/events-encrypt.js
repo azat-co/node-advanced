@@ -1,13 +1,13 @@
 const events = require('events')
 class Encrypt extends events {
-  constructor(ops) {
+  constructor (ops) {
     super(ops)
     this.on('start', () => {
       console.log('beginning A')
-    })    
+    })
     this.on('start', () => {
       console.log('beginning B')
-      setTimeout(()=>{
+      setTimeout(() => {
         this.emit('finish', {msg: 'ok'})
       }, 0)
     })

@@ -1,10 +1,10 @@
 const fs = require('fs')
 
-const readFileIntoArray = function(file, cb = null) {
+const readFileIntoArray = function (file, cb = null) {
   return new Promise((resolve, reject) => {
     fs.readFile(file, (error, data) => {
       if (error) {
-        if (cb) return cb(error) 
+        if (cb) return cb(error)
         return reject(error)
       }
 
