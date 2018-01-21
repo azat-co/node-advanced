@@ -15,7 +15,7 @@ class Encrypt extends events {
 }
 
 const encrypt = new Encrypt()
+encrypt.emit('start')
 encrypt.on('finish', (data) => {
   console.log(`Finshed with message: ${data.msg}`)
 })
-encrypt.emit('start')
