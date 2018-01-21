@@ -1,10 +1,15 @@
+const fs = require('fs')
 const util = require('util')
 const f = async function () {
   try {
-    await util.promisify(setTimeout)(() => { consoleg.log('here') }, 1000)
+    const data = await util.promisify(fs.readFile)('os.js', 'utf8') // <- try changing to non existent file to trigger an error
+    console.log(data)
   } catch (e) {
-    await Promise.reject(new Error('test'))
+    console.log('ooops')
+    console.error(e)
+    process.exit(1)
   }
 }
 
 f()
+console.log('could be doing something else')

@@ -35,4 +35,4 @@ server.on('connection', socket => {
   })
 })
 
-server.listen(8000, () => console.log('Server bound'))
+server.listen(3000, () => console.log('Server bound'))
