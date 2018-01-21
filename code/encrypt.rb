@@ -6,6 +6,7 @@ iv = cipher.random_iv
 
 encrypted_string = cipher.update ENV["STR"]
 encrypted_string << cipher.final
+sleep 2
 File.write('ruby-encrypted.txt', encrypted_string)
 
 # puts encrypted_string
