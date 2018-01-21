@@ -1,2 +1,6 @@
 const {spawn} = require('child_process')
-spawn('cd $HOME/Downloads && find . -type f | wc -l', {stdio: 'inherit', shell: true})
+const path = process.argv[2] || '$HOME/Downloads'
+spawn(`cd ${path} && find . -type f | wc -l`, {
+  stdio: 'inherit',
+  shell: true
+})
