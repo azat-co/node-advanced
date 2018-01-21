@@ -1,3 +1,4 @@
+
 const {exec} = require('child_process')
 console.time('hashing')
 const str = 'React Quickly: Painless web apps with React, JSX, Redux, and GraphQL'.repeat(100)

@@ -2798,11 +2798,16 @@ To start debugging, open the following URL in Chrome:
     chrome-devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=127.0.0.1:9229/dc9010dd-f8b8-4ac5-a510-c1a114ec7d29
 ```
 
-
 Better to break right away:
 
 ```
-$ node --inspect --debug-brk index.js
+node --inspect-brk debug-me.js
+```
+
+Old (deprecated):
+
+```
+node --inspect --debug-brk index.js
 ```
 
 ---
