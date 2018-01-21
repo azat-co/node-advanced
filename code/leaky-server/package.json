@@ -1,0 +1,17 @@
+{
+  "name": "leaky-server",
+  "version": "1.0.1",
+  "description": "",
+  "main": "server-memwatch.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "Azat Mardan (http://azat.co/)",
+  "license": "MIT",
+  "dependencies": {
+    "heapdump": "0.3.9",
+    "memwatch-next": "0.3.0"
+  }
+}

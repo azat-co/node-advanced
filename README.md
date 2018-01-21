@@ -7,17 +7,16 @@ autoscale:true
 [.slidenumbers: false] 
 [.hide-footer]
 
-![fit](images/Node-Advanced-x2-1.png)
+![](images/Node-Advanced-x2-1.png)
 
 ---
 
 # Node Advanced
 ## Overview
+### Azat Mardan @azat_co
 
-![](images/Node-Advanced-x2-1.png)
 
-![inline 100%](images/azat.jpeg)
-Azat Mardan @azat_co
+![left](images/azat node interacitev no pipe.jpeg)
 
 ![inline right](images/nu.png)
 
@@ -103,7 +102,7 @@ Do not expect:
 * Embrace errors
 * Increase curiosity
 * Experiment by iteration
-* Get comfortable reading source code of Nodejs, npm, and npm modules
+* Get comfortable reading source code of Node.js, npm, and npm modules
 * Enjoy the process
 
 ---
@@ -207,7 +206,30 @@ Check if the package exists/installed or not but does not execute
 
 ## `require.extensions`
 
+```js
 { '.js': [Function], '.json': [Function], '.node': [Function] }
+```
+
+```js
+function (module, filename) { // require.extensions['.js'].toString()
+  var content = fs.readFileSync(filename, 'utf8');
+  module._compile(internalModule.stripBOM(content), filename);
+  }
+
+function (module, filename) { // require.extensions['.json'].toString()
+    var content = fs.readFileSync(filename, 'utf8');
+    try {
+          module.exports = JSON.parse(internalModule.stripBOM(content));
+      } catch (err) {
+          err.message = filename + ': ' + err.message;
+        throw err;
+      }
+    }
+
+function (module, filename) { // > require.extensions['.node'].toString()
+    return process.dlopen(module, path._makeLong(filename));
+}
+```
 
 ---
 
@@ -394,8 +416,8 @@ module.exports = () => {
 Importing function, not object, so use:
 
 ```js
-const {parse} = require('./namejs')()
-const parse = require('./namejs')().parse
+const {parse} = require('./name.js')()
+const parse = require('./name.js')().parse
 ```
 
 (`modules/main-3.js` and `modules/module-3.js`)
@@ -414,7 +436,7 @@ module.exports = Parser
 ```
 
 ```js
-const Parser = require('./namejs')
+const Parser = require('./name.js')
 const parser = new Parser()
 const parse = parser.parse // or const {parse} = parser
 ```
@@ -453,8 +475,7 @@ For now, it's better to use Babel or just stick with `require`
 
 ```js
 require('./module-4.js')
-delete req
-uire.cache[require.resolve('./module-4.js')]
+delete require.cache[require.resolve('./module-4.js')]
 require('./module-4.js')
 ```
 
@@ -855,7 +876,7 @@ All callbacks passed to process.nextTick() will be resolved before the event loo
 
 ## Event Emit nextTick Example in http
 
-In http, to make sure event listeners are attached before emitting error (or anything else), [source](https://github.com/nodejs/node/blob/3b8da4cbe8a7f36fcd8892c6676a55246ba8c3be/lib/_http_client.js#L205):
+In http, to make sure event listeners are attached before emitting error (or anything else) <sup>[source](https://github.com/nodejs/node/blob/3b8da4cbe8a7f36fcd8892c6676a55246ba8c3be/lib/_http_client.js#L205)</sup>:
 
 ```js
     if (err) {
@@ -869,7 +890,7 @@ In http, to make sure event listeners are attached before emitting error (or any
 
 ## Async or Sync Error Handling in fs
 
-To postpone callback if it's set (async) or throw error right away (sync), [source](https://github.com/nodejs/node/blob/8aec3638cebd338b0ea2a62c3e1469b8e29616d7/lib/fs.js#L363):
+To postpone callback if it's set (async) or throw error right away (sync) <sup>[source](https://github.com/nodejs/node/blob/8aec3638cebd338b0ea2a62c3e1469b8e29616d7/lib/fs.js#L363)</sup>:
 
 ```js
 function handleError(val, callback) {
@@ -1037,7 +1058,7 @@ promise1(data1)
 ```js
 const axios = require('axios')
 axios.get('http://azat.co')
-  .then((response)=>response.data)
+  .then((response) => response.data)
   .then(html => console.log(html))
 ```  
 
@@ -1084,15 +1105,14 @@ myAsyncTimeoutFn('just a silly string argument', () => {
 ```js
 function myAsyncTimeoutFn(data) {
   let _callback = null
-  setTimeout( () => {
-    if ( _callback ) callback()
+  setTimeout(() => {
+    if (_callback) _callback()
   }, 1000)
   return {
     then(cb){
       _callback = cb
     }
   }
-
 }
 
 myAsyncTimeoutFn('just a silly string argument').then(() => {
@@ -1324,7 +1344,7 @@ Events are about building extensible functionality and making modular code flexi
 
 ## Default Max Event Listeners
 
-Default maximum listeners is 10 (to find memory leaks), use `setMaxListeners` ([source](https://github.com/nodejs/node/blob/master/lib/events.js#L81))
+Default maximum listeners is 10 (to find memory leaks), use `setMaxListeners`<sup>[source](https://github.com/nodejs/node/blob/master/lib/events.js#L81)</sup>
 
 ```js
 var defaultMaxListeners = 10;
@@ -1462,7 +1482,7 @@ describe('express rest api server', async () => {
 
 ## Project: Avatar Service
 
-Koa Server with Mocha and Async/await Fn and Promise.all
+Koa Server with Mocha and Async/await Fn and `Promise.all`
 
 Terminal:
 
@@ -1473,7 +1493,7 @@ npm i
 npm start
 ```
 
-Open in a Browser: <http://localhost:3000/?email=YOUEMAIL>, e.g., <http://localhost:3000/?email=hi@node.university> to see your avatar (powered by Gravatar)
+Open in a Browser: <http://localhost:3000/?email=YOURMAIL>, e.g., <http://localhost:3000/?email=hi@node.university> to see your avatar (powered by Gravatar)
 
 ---
 
@@ -1699,7 +1719,48 @@ r.pipe(e).pipe(z).pipe(w)
 
 ---
 
-![inline](https://www.dropbox.com/s/hmjw88zwhm0uhur/Screenshot%202018-01-14%2017.40.49.png?dl=0)
+## Readable Streams Events
+
+* data
+* end
+* error
+* close
+* readable
+
+---
+
+## Readable Streams Methods
+
+* `pipe()` 
+* `unpipe()`
+* `read()` 
+* `unshift()` 
+* `resume()`
+* `pause()` 
+* `isPaused()` 
+* `setEncoding()`
+
+---
+
+## Writable Streams Events
+
+* drain
+* finish
+* error
+* close
+* pipe
+* unpipe
+
+---
+
+## Writable Streams Methods
+
+* `write()` 
+* `end()`
+* `cork()` 
+* `uncork()` 
+* `setDefaultEncoding()`
+
 
 ---
 
@@ -1890,7 +1951,7 @@ const MyTransform = new Transform({
 
 ---
 
-## Transform Real Life Example: Zlib from Node Source
+## Transform Real Life Example: Zlib from Node Core <sup>[source](https://github.com/nodejs/node/blob/master/lib/zlib.js#L395)</sup>
 
 ```js
 Zlib.prototype._transform = function _transform(chunk, encoding, cb) {
@@ -1913,7 +1974,7 @@ Zlib.prototype._transform = function _transform(chunk, encoding, cb) {
 };
 ```
 
-Node source on GitHub: <https://github.com/nodejs/node/blob/master/lib/zlib.js#L395>
+ 
 
 ---
 
@@ -1929,7 +1990,7 @@ Node source on GitHub: <https://github.com/nodejs/node/blob/master/lib/zlib.js#L
 
 ## Overwrite Streams
 
-Since Node.js v0.10, the Stream class has offered the ability to modify the behaviour of the .read() or .write() by using the underscore version of these respective functions (._read() and ._write()).
+Since Node.js v0.10, the Stream class has offered the ability to modify the behavior of the .read() or .write() by using the underscore version of these respective functions (._read() and ._write()).
 
 [Guide](https://nodejs.org/en/docs/guides/backpressuring-in-streams)
 
@@ -2141,25 +2202,29 @@ RUB
 
 ## http
 
-static file server (file-server.js)
+Protected SQL archive (file-server/file-server.js):
 
 ```js
 const url = require('url')
+const fs = require('fs')
 const SECRET = process.env.SECRET
 const server = require('http').createServer((req, res) => {
   console.log(`URL is ${req.url} and the method is ${req.method}`)
-  const courseId = req.url.match(/courses\/([0-9]*)/)[1] // works for /courses/123 to get 123
+  const course = req.url.match(/courses\/([0-9]*)/) // works for /courses/123 to get 123
   const query = url.parse(req.url, true).query // works for /?key=value&key2=value2 
-  if (courseId && API_KEY===SECRET) {
-    fs.readFile('./archive.sql', (error, data)=>{
+  if (course && course[1] && query.API_KEY === SECRET) {
+    fs.readFile('./clients_credit_card_archive.sql', (error, data)=>{
       if (error) {
         res.writeHead(500)
-        res.end()
+        res.end('Server error')
       } else {
         res.writeHead(200, {'Content-Type': 'text/plain' })
         res.end(data)
       }
     })
+  } else {
+    res.writeHead(404)
+    res.end('Not found')
   }
 }).listen(3000, () => {
   console.log('server is listening on 3000')
@@ -2639,6 +2704,47 @@ web3.send(txHash, (error, results)=>{
 
 ---
 
+
+## REPL Tricks (which can be used for quick testing and debugging)
+
+* Core modules are there already
+* You can load any module with `require()` (must be installed with proper path)
+* You can see all your sessions' histories in `~/.node_repl_history`, i.e., `cat ~/.node_repl_history` or `tail ~/.node_repl_history`
+
+---
+
+## REPL Commands
+
+* `.break`: When in the process of inputting a multi-line expression, entering the .break command (or pressing the <ctrl>-C key combination) will abort further input or processing of that expression.
+* `.clear`: Resets the REPL context to an empty object and clears any multi-line expression currently being input.
+* `.exit`: Close the I/O stream, causing the REPL to exit.
+* `.help`: Show this list of special commands.
+* `.save`: Save the current REPL session to a file: > .save ./file/to/save.js
+* `.load`: Load a file into the current REPL session. > .load ./file/to/load.js
+
+---
+
+## Editing in REPL
+
+`.editor` - Enter editor mode (<ctrl>-D to finish, <ctrl>-C to cancel)
+
+```
+> .editor
+// Entering editor mode (^D to finish, ^C to cancel)
+function welcome(name) {
+  return `Hello ${name}!`;
+}
+
+welcome('Node.js User');
+
+// ^D
+'Hello Node.js User!'
+>
+```
+
+---
+
+
 ## Real Debuggers
 
 * CLI
@@ -2696,6 +2802,7 @@ $ node --inspect --debug-brk index.js
 
 ---
 
+
 ## Node V8 Inspector Demo
 
 ---
@@ -2710,6 +2817,198 @@ $ node --inspect --debug-brk index.js
 ---
 
 ## Networking Debugging with DevTools
+
+---
+
+## V8 Memory Scheme
+
+Resident Set:
+
+* Code: Node/JS code
+* Stack: Primitives, local variables, pointers to objects in the heap and control flow
+* Heap: Referenced types such as Objects, strings, closures
+
+---
+
+```
+process.memoryUsage()
+```
+
+```
+{ rss: 12476416,
+  heapTotal: 7708672,
+  heapUsed: 5327904,
+  external: 8639 }
+```
+
+---
+
+## Heap
+
+* New Space&Young Generation: New allocations, size 1-8Mb, fast collection (Scavenge), ~20% goes into Old Space
+* Old Space&Old Generation: Allocation is fast but collection is expensive (Mark-Sweep)
+
+
+---
+
+## Garbage Collection
+
+The mechanism that allocates and frees heap memory is called garbage collection.
+
+---
+
+## Garbage Collection (Cont)
+
+* Automatic in Node, thanks to V8
+* Stops the world - expensive
+* Objects with refs are not collected (memory leaks)
+
+---
+
+## Memory Leak
+
+---
+
+![fit](images/memory-leak.png)
+
+---
+
+## Leaky Server
+
+```js
+const express = require('express')
+
+const app = express()
+
+let cryptoWallet = {}
+const generateAddress = () => {
+  const initialCryptoWallet = cryptoWallet
+  const tempCryptoWallet = () => {
+    if (initialCryptoWallet) console.log('We received initial cryptoWallet')
+  }
+  cryptoWallet = {
+    key: new Array(1e7).join('.'),
+    address: () => {
+      // ref to tempCryptoWallet ???
+      console.log('address returned')
+    }
+  }
+}
+
+app.get('*', (req, res) => {
+  generateAddress()
+  console.log( process.memoryUsage())
+  return res.json({msg: 'ok'})
+})
+app.listen(3000)
+```
+
+---
+
+## Starting the LEAK
+
+```
+loadtest -c 100 --rps 100 http://localhost:3000
+node leaky-server/server.js
+```
+
+
+```
+{ rss: 1395490816,
+  heapTotal: 1469087744,
+  heapUsed: 1448368200,
+  external: 16416 }
+{ rss: 1405501440,
+  heapTotal: 1479098368,
+  heapUsed: 1458377224,
+  external: 16416 }
+{ rss: 1335377920,
+  heapTotal: 1409097728,
+  heapUsed: 1388386720,
+  external: 16416 }
+```
+
+---  
+
+## GCs
+
+```
+<--- Last few GCs --->
+
+[35417:0x103000c00]    36302 ms: Mark-sweep 1324.1 (1345.3) -> 1324.1 (1345.3) MB, 22.8 / 0.0 ms  allocation failure GC in old space requested
+[35417:0x103000c00]    36328 ms: Mark-sweep 1324.1 (1345.3) -> 1324.1 (1330.3) MB, 26.4 / 0.0 ms  last resort GC in old space requested
+[35417:0x103000c00]    36349 ms: Mark-sweep 1324.1 (1330.3) -> 1324.1 (1330.3) MB, 20.9 / 0.0 ms  last resort GC in old space requested
+```
+
+---
+
+## Line 12
+
+```
+==== JS stack trace =========================================
+
+Security context: 0x3c69fae25ee1 <JSObject>
+    2: generateAddress [/Users/azat/Documents/Code/node-advanced/code/leaky-server/server.js:12] [bytecode=0x3c69df959db9 offset=42](this=0x3c69a7f0c0b9 <JSGlobal Object>)
+    4: /* anonymous */ [/Users/azat/Documents/Code/node-advanced/code/leaky-server/server.js:20] [bytecode=0x3c69df959991 offset=7](this=0x3c69a7f0c0b9 <JSGlobal Object>,req=0x3c69389c07c1 <IncomingMessage map = 0x3c693e7300f1...
+
+
+    FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+```
+
+---
+
+## Memory Leak Mitigation
+
+* Reproduce the error/leak
+* Check for variables and fn arguments, pure fns are better
+* Take heap dumps and compare (with debug and DevTools or heapdump modules)
+* Update Node
+* Get rid of extra npm modules
+* Trial and error: remove code you think is leaky
+* Modularize&refactor 
+
+---
+
+Useful Libraries
+
+* <https://www.npmjs.com/package/memwatch-next>
+* <https://www.npmjs.com/package/systeminformation> 
+* <https://github.com/bnoordhuis/node-heapdump>
+
+---
+
+## Heap Dumping 
+
+`code/leaky-server/server-heapdump.js`:
+
+```js
+// ...
+const heapdump = require('heapdump')
+setInterval(function () {
+  heapdump.writeSnapshot()
+}, 2 * 1000)
+// ...
+```
+
+Creates files in the current folder:
+
+```
+heapdump-205347232.998971.heapsnapshot
+heapdump-205508465.289834.heapsnapshot
+heapdump-205513413.472744.heapsnapshot
+```
+
+---
+
+![fit](images/heap-object-count.png)
+
+---
+
+![fit](images/heap-retained-size.png)
+
+---
+
+![fit](images/heap-shallow-size.png)
 
 ---
 
@@ -2874,6 +3173,8 @@ File.write('ruby-encrypted.txt', encrypted_string)
 
 ---
 
+## Things You Can Do with `os`
+
 ```js
 const os = require('os')
 console.log(os.freemem())
@@ -2935,41 +3236,18 @@ cpus.forEach((cpu, i) => {
 
 ---
 
-## Free Memory
-
-* `free = 
-
-TK
-
----
-
-## Garbage collection
-
-TK
-
----
-
-Useful Libraries
-
-*
-* <https://www.npmjs.com/package/systeminformation> and <https://github.com/sebhildebrandt/systeminformation>
-
-
----
-
 ## The Core `cluster` Module
-
-
----
 
 * Master process
 * Worker processes: it's own PID, event loop and memory space
 * Load testing - round robin or the second approach is where the master process creates the listen socket and sends it to interested workers. The workers then accept incoming connections directly.
-* Use the child_process.fork() method and messaging
+* Use the `child_process.fork()` method and messaging
 
 ---
 
-## Round Robin uses shift and push
+##  Load Testing
+
+`cluster` uses round Robin uses shift and push <sup>[source](https://github.com/nodejs/node/blob/master/lib/internal/cluster/round_robin_handle.js#L84)</sup>
 
 ```js
 RoundRobinHandle.prototype.distribute = function(err, handle) {
@@ -2980,12 +3258,6 @@ RoundRobinHandle.prototype.distribute = function(err, handle) {
     this.handoff(worker);
 };
 ```
-
-Source: <https://github.com/nodejs/node/blob/master/lib/internal/cluster/round_robin_handle.js#L84>
-
----
-
-##  Load Testing
 
 ---
 
@@ -3079,6 +3351,8 @@ Third terminal window/tab:
 curl localhost:3000
 ```
 
+Result: 2nd request (3rd terminal) will wait for the 1st request (2nd terminal)
+
 ---
 
 ## Optimizing The Password Salting+Hashing Server
@@ -3124,6 +3398,30 @@ app.post('/signup', (req, res) => {
 
 ---
 
+## Testing Server v2 (Forked Process)
+
+Terminal:
+
+```
+node server-v2.js
+```
+
+Another terminal (not the first terminal):
+
+```
+curl localhost:3000/signup -d '{"password":123}' -H "Content-Type: application/json" -X POST
+```
+
+Third terminal window/tab:
+
+```
+curl localhost:3000
+```
+
+Result: 2nd request (3rd terminal) will NOT wait for the 1st request (2nd terminal)
+
+---
+
 ## We can fork the v1 server without splitting the hashing+salting function into a worker
 
 ---
@@ -3131,7 +3429,7 @@ app.post('/signup', (req, res) => {
 
 ## Server With a Forked Cluster 
 
-node server-v3.js
+`code/offload/server-v3.j`:
 
 ```js
 const express = require('express')
@@ -3150,6 +3448,16 @@ if (cluster.isMaster) {
   })
   return true
 } 
+```
+
+
+---
+
+## Server With a Forked Cluster (Cont)
+
+`code/offload/server-v3.j`:
+
+```js
 // cluster.isWorker === true
 const hashPassword = (password, cb) => {  
   const hash = bcrypt.hashSync(password, 16) // bcrypt has async but we are using sync here for the example
@@ -3173,11 +3481,39 @@ app.listen(3000)
 
 ---
 
+## Testing Server v3 (Forked Server)
+
+Terminal:
+
+```
+node server-v3.js
+```
+
+Another terminal (not the first terminal):
+
+```
+curl localhost:3000/signup -d '{"password":123}' -H "Content-Type: application/json" -X POST
+```
+
+Third terminal window/tab:
+
+```
+curl localhost:3000
+```
+
+Result: 2nd request (3rd terminal) will NOT wait for the 1st request (2nd terminal)
+
+---
+
 > Node.js does not automatically manage the number of workers, however. It is the application's responsibility to manage the worker pool based on its own needs.
 
 ---
 
-## No Fault Tolerance
+## No Fault Tolerance in Server v3
+
+```
+node server-v3.js
+```
 
 ```
 ps aux | grep 'node'
@@ -3185,6 +3521,8 @@ kill 12668
 ```
 
 ---
+
+## Implementing Fault Tolerance in Server v4
 
 in `isMaster` in `code/offload/server-v4.js`:
 
@@ -3204,7 +3542,11 @@ in `isMaster` in `code/offload/server-v4.js`:
 
 ---
 
-## Fault Tolerance
+## Fault Tolerance in Server v4
+
+```
+node server-v4.js
+```
 
 ```
 ps aux | grep 'node'
