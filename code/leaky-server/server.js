@@ -15,6 +15,7 @@ const generateAddress = () => {
       console.log('address returned')
     }
   }
+
 }
 
 app.get('*', (req, res) => {
