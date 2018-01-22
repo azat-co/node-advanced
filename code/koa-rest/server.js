@@ -11,7 +11,7 @@ app.use(async ctx => {
   const response = await axios.get(`https://gravatar.com/avatar/${hash}?size=150`, {
     responseType: 'arraybuffer',
     headers: {
-      'Accept': 'image/jpeg',    
+      'Accept': 'image/jpeg',
     }
   })
   ctx.set('Content-Disposition', `inline; filename =${email}_avatar.jpeg`)

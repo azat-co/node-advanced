@@ -8,9 +8,11 @@ const {promisify} = require('util')
 const readFile = promisify(require('fs').readFile)
 
 const AZAT_EMAIL = 'hi@azat.co'
-let server 
+let server
 before(async function() {
-  server = await app.listen(port, ()=>{console.log('server is running')})
+  server = await app.listen(port, ()=>{
+    console.log('server is running')
+  })
   console.log('code after the server is running')
 })
 
@@ -21,7 +23,7 @@ describe('express rest api server', async () => {
     expect(image).to.eql((await readFile('./azat_avatar.jpeg')).toString())
   })
 
-  it('retrieves Azat\'s avatar which is the same as gravatar image', async () => {    
+  it('retrieves Azat\'s avatar which is the same as gravatar image', async () => {
     await Promise.all([
       axios.get(`http://localhost:${port}?email=${AZAT_EMAIL}`, {responseType: 'arraybuffer'}),
       axios.get(`https://gravatar.com/avatar/${crypto.createHash('md5').update(AZAT_EMAIL).digest('hex')}?size=150`, {responseType: 'arraybuffer'})
