@@ -6,7 +6,7 @@ const parse = (csvString = '') => {
   const lines = csvString.split('\n')
   let result = []
   let headers = lines[0].split(',')
-  
+
   lines.forEach((line, i) => {
     let obj = {}
     let fields = line.split(',')
@@ -15,11 +15,13 @@ const parse = (csvString = '') => {
       result.push(obj)
     })
   })
-  
+
   return result
 }
 
-module.exports = () => {
+module.exports = (ops) => {
+  console.log(ops)
+  // do some code with ops
   return {
     parse
   }

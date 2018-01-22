@@ -1,4 +1,4 @@
-const csvConverter = require('./module-3.js')().parse
+const csvConverter = require('./module-3.js')({pretty: true}).parse
 
 const csvString = `id,first_name,last_name,email,gender,ip_address
 1,Rivi,Farguhar,rfarguhar0@arizona.edu,Female,246.93.153.167
