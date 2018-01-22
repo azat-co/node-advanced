@@ -4,10 +4,12 @@ const path = require('path')
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
 
+// bcrypt has async but we are using sync here for the example
 const hashPassword = (password, cb) => {
-  const hash = bcrypt.hashSync(password, 16) // bcrypt has async but we are using sync here for the example
+  const hash = bcrypt.hashSync(password, 16)
   cb(hash)
 }
+
 app.use(bodyParser.json())
 app.get('/', (req, res) => {
   res.send('welcome to strong password site')
