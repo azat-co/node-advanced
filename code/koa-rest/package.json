@@ -9,5 +9,9 @@
   },
   "keywords": [],
   "author": "Azat Mardan (http://azat.co/)",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "axios": "0.18.0",
+    "koa": "2.7.0"
+  }
 }
